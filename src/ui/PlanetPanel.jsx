@@ -126,15 +126,22 @@ export default function PlanetPanel() {
             )}
 
             {/* Type badge */}
-            {(planet.isStar || planet.isGalaxy) && (
-              <div>
+            {(planet.isStar || planet.isGalaxy || planet.isMoon) && (
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className={`inline-block px-3 py-1 rounded-full text-xs border ${
                   planet.isStar
                     ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-                    : 'bg-violet-500/10 text-violet-400 border-violet-500/20'
+                    : planet.isGalaxy
+                    ? 'bg-violet-500/10 text-violet-400 border-violet-500/20'
+                    : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
                 }`}>
-                  {planet.isStar ? 'Жұлдыз' : 'Галактика'}
+                  {planet.isStar ? 'Жұлдыз' : planet.isGalaxy ? 'Галактика' : 'Серік'}
                 </span>
+                {planet.parentName && (
+                  <span className="text-xs text-gray-500">
+                    {planet.parentName} серігі
+                  </span>
+                )}
               </div>
             )}
 
