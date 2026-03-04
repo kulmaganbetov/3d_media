@@ -74,9 +74,9 @@ const Sun = React.memo(function Sun() {
         <meshBasicMaterial color="#ff6600" transparent opacity={0.015} side={THREE.BackSide} />
       </mesh>
 
-      {/* Primary sun light — warm white, strong */}
-      <pointLight color="#fff5e0" intensity={4} distance={500} decay={1.5} />
-      <pointLight color="#FFD080" intensity={0.8} distance={200} decay={2} />
+      {/* Primary sun light — strong, far reach */}
+      <pointLight color="#fff5e0" intensity={6} distance={0} decay={1} />
+      <pointLight color="#FFD080" intensity={2} distance={0} decay={1.5} />
 
       {/* Label */}
       <Html position={[0, SUN_DATA.radius + 2, 0]} center distanceFactor={60}>
