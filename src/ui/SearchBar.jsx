@@ -5,8 +5,14 @@ import { NEARBY_STARS } from '../components/Stars';
 import { GALAXY_DATA } from '../components/Galaxies';
 import useStore from '../store/useStore';
 
+// Collect all moons from planets
+const ALL_MOONS = PLANETS.flatMap((p) =>
+  (p.moons || []).filter((m) => m.realData)
+);
+
 const ALL_SEARCHABLE = [
   ...PLANETS,
+  ...ALL_MOONS,
   ...NEARBY_STARS,
   ...GALAXY_DATA,
 ];
