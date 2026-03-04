@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 import Scene from './components/Scene';
 import Loader from './ui/Loader';
 import PlanetPanel from './ui/PlanetPanel';
 import ComparePanel from './ui/ComparePanel';
 import TimeControls from './ui/TimeControls';
 import SearchBar from './ui/SearchBar';
+import DocumentariesPage from './ui/DocumentariesPage';
 import useStore from './store/useStore';
 import { PLANETS, LABELS } from './data/planets';
 
@@ -26,6 +28,16 @@ function TopBar() {
       </div>
 
       <div className="flex items-center gap-4">
+        <Link
+          to="/documentaries"
+          className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-accent transition-colors flex items-center gap-1.5"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="hidden sm:inline">Бейнелер</span>
+        </Link>
         <span className="text-xs text-gray-500 font-mono hidden sm:block">
           {String(clock.getHours()).padStart(2,'0')}:{String(clock.getMinutes()).padStart(2,'0')}:{String(clock.getSeconds()).padStart(2,'0')}
         </span>
@@ -101,18 +113,26 @@ export default function App() {
   }, [isPaused, speedMultiplier, setSimDate]);
 
   return (
-    <div className="w-full h-full relative bg-black">
-      <Loader />
-      <Scene />
-      {isLoaded && (
-        <>
-          <TopBar />
-          <PlanetPanel />
-          <ComparePanel />
-          <TimeControls />
-          <KeyboardHint />
-        </>
-      )}
-    </div>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <div className="w-full h-full relative bg-black">
+            <Loader />
+            <Scene />
+            {isLoaded && (
+              <>
+                <TopBar />
+                <PlanetPanel />
+                <ComparePanel />
+                <TimeControls />
+                <KeyboardHint />
+              </>
+            )}
+          </div>
+        }
+      />
+      <Route path="/documentaries" element={<DocumentariesPage />} />
+    </Routes>
   );
 }
