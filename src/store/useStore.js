@@ -1,11 +1,9 @@
 import { create } from 'zustand';
 
-const useStore = create((set) => ({
-  // Selected planet
+const useStore = create((set, get) => ({
   selectedPlanet: null,
   setSelectedPlanet: (planet) => set({ selectedPlanet: planet }),
 
-  // Comparison
   comparePlanets: [],
   addComparePlanet: (planet) =>
     set((state) => {
@@ -19,7 +17,6 @@ const useStore = create((set) => ({
     })),
   clearComparePlanets: () => set({ comparePlanets: [] }),
 
-  // Time controls
   isPaused: false,
   togglePause: () => set((state) => ({ isPaused: !state.isPaused })),
   setPaused: (v) => set({ isPaused: v }),
@@ -27,23 +24,26 @@ const useStore = create((set) => ({
   speedMultiplier: 1,
   setSpeedMultiplier: (s) => set({ speedMultiplier: s }),
 
-  // Real positions mode
   realPositions: false,
   toggleRealPositions: () => set((state) => ({ realPositions: !state.realPositions })),
 
-  // Simulation date
   simDate: new Date(),
-  setSimDate: (d) => set({ simDate: d instanceof Date ? d : new Date(d) }),
+  setSimDate: (d) => {
+    if (typeof d === 'function') {
+      const result = d(get().simDate);
+      set({ simDate: result instanceof Date && !isNaN(result) ? result : new Date() });
+    } else {
+      const date = d instanceof Date ? d : new Date(d);
+      set({ simDate: !isNaN(date) ? date : new Date() });
+    }
+  },
 
-  // Loading
   isLoaded: false,
   setIsLoaded: (v) => set({ isLoaded: v }),
 
-  // Camera target for fly-to
   cameraTarget: null,
   setCameraTarget: (t) => set({ cameraTarget: t }),
 
-  // Intro done
   introDone: false,
   setIntroDone: (v) => set({ introDone: v }),
 }));

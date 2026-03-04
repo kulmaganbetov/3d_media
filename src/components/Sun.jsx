@@ -18,7 +18,7 @@ const Sun = React.memo(function Sun() {
       uTime: { value: 0 },
       uColor1: { value: new THREE.Color('#FDB813') },
       uColor2: { value: new THREE.Color('#ff6600') },
-      uIntensity: { value: 1.5 },
+      uIntensity: { value: 1.8 },
     }),
     []
   );
@@ -29,10 +29,10 @@ const Sun = React.memo(function Sun() {
       materialRef.current.uniforms.uTime.value = t;
     }
     if (meshRef.current) {
-      meshRef.current.rotation.y = t * 0.05;
+      meshRef.current.rotation.y = t * 0.03;
     }
     if (glowRef.current) {
-      const s = 1.0 + Math.sin(t * 2) * 0.03;
+      const s = 1.0 + Math.sin(t * 1.5) * 0.02;
       glowRef.current.scale.setScalar(s);
     }
   });
@@ -45,7 +45,7 @@ const Sun = React.memo(function Sun() {
 
   return (
     <group>
-      {/* Sun sphere */}
+      {/* Sun sphere with procedural shader */}
       <mesh ref={meshRef} onClick={handleClick}>
         <sphereGeometry args={[SUN_DATA.radius, 64, 64]} />
         <shaderMaterial
@@ -56,31 +56,27 @@ const Sun = React.memo(function Sun() {
         />
       </mesh>
 
-      {/* Glow sprite */}
+      {/* Inner corona */}
       <mesh ref={glowRef}>
-        <sphereGeometry args={[SUN_DATA.radius * 1.4, 32, 32]} />
-        <meshBasicMaterial
-          color="#FDB813"
-          transparent
-          opacity={0.15}
-          side={THREE.BackSide}
-        />
+        <sphereGeometry args={[SUN_DATA.radius * 1.15, 32, 32]} />
+        <meshBasicMaterial color="#FDB813" transparent opacity={0.12} side={THREE.BackSide} />
       </mesh>
 
-      {/* Outer glow */}
+      {/* Outer corona */}
       <mesh>
-        <sphereGeometry args={[SUN_DATA.radius * 2.0, 32, 32]} />
-        <meshBasicMaterial
-          color="#ff8800"
-          transparent
-          opacity={0.05}
-          side={THREE.BackSide}
-        />
+        <sphereGeometry args={[SUN_DATA.radius * 1.6, 32, 32]} />
+        <meshBasicMaterial color="#ff9900" transparent opacity={0.04} side={THREE.BackSide} />
       </mesh>
 
-      {/* Point light */}
-      <pointLight color="#FDB813" intensity={3} distance={300} decay={1} />
-      <pointLight color="#ffffff" intensity={1} distance={500} decay={2} />
+      {/* Faint outermost glow */}
+      <mesh>
+        <sphereGeometry args={[SUN_DATA.radius * 2.5, 16, 16]} />
+        <meshBasicMaterial color="#ff6600" transparent opacity={0.015} side={THREE.BackSide} />
+      </mesh>
+
+      {/* Primary sun light — warm white, strong */}
+      <pointLight color="#fff5e0" intensity={4} distance={500} decay={1.5} />
+      <pointLight color="#FFD080" intensity={0.8} distance={200} decay={2} />
 
       {/* Label */}
       <Html position={[0, SUN_DATA.radius + 2, 0]} center distanceFactor={60}>

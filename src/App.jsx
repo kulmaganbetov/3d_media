@@ -27,7 +27,7 @@ function TopBar() {
 
       <div className="flex items-center gap-4">
         <span className="text-xs text-gray-500 font-mono hidden sm:block">
-          {clock.toLocaleTimeString('kk-KZ')}
+          {String(clock.getHours()).padStart(2,'0')}:{String(clock.getMinutes()).padStart(2,'0')}:{String(clock.getSeconds()).padStart(2,'0')}
         </span>
         <SearchBar />
       </div>
@@ -95,10 +95,7 @@ export default function App() {
   useEffect(() => {
     if (isPaused) return;
     const iv = setInterval(() => {
-      setSimDate((prev) => {
-        const current = useStore.getState().simDate;
-        return new Date(current.getTime() + 1000 * speedMultiplier);
-      });
+      setSimDate((prev) => new Date(prev.getTime() + 1000 * speedMultiplier));
     }, 1000);
     return () => clearInterval(iv);
   }, [isPaused, speedMultiplier, setSimDate]);
