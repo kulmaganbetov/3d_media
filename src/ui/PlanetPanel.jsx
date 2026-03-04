@@ -99,7 +99,7 @@ export default function PlanetPanel() {
               </div>
             </div>
             <div className="flex gap-2">
-              {!planet.isSun && (
+              {!planet.isSun && !planet.isStar && !planet.isGalaxy && (
                 <button
                   onClick={() => addComparePlanet(planet)}
                   className="text-xs px-3 py-1 rounded-lg bg-accent/10 text-accent hover:bg-accent/20 transition-colors"
@@ -125,20 +125,33 @@ export default function PlanetPanel() {
               </div>
             )}
 
+            {/* Type badge */}
+            {(planet.isStar || planet.isGalaxy) && (
+              <div>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs border ${
+                  planet.isStar
+                    ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                    : 'bg-violet-500/10 text-violet-400 border-violet-500/20'
+                }`}>
+                  {planet.isStar ? 'Жұлдыз' : 'Галактика'}
+                </span>
+              </div>
+            )}
+
             {/* Stats */}
             {planet.realData && (
               <div>
-                {planet.realData.diameter_km && (
-                  <StatRow label={LABELS.diameter} value={planet.realData.diameter_km.toLocaleString()} unit={LABELS.km} />
+                {planet.realData.diameter_km != null && (
+                  <StatRow label={LABELS.diameter} value={typeof planet.realData.diameter_km === 'number' ? planet.realData.diameter_km.toLocaleString() : planet.realData.diameter_km} unit={typeof planet.realData.diameter_km === 'number' ? LABELS.km : ''} />
                 )}
                 {planet.realData.mass_kg && (
                   <StatRow label={LABELS.mass} value={planet.realData.mass_kg} unit="кг" />
                 )}
-                {planet.realData.density !== undefined && (
+                {planet.realData.density != null && planet.realData.density !== '—' && (
                   <StatRow label={LABELS.density} value={planet.realData.density} unit="г/см³" />
                 )}
-                {planet.realData.distanceFromSun_km && (
-                  <StatRow label={LABELS.distanceFromSun} value={planet.realData.distanceFromSun_km.toLocaleString()} unit={LABELS.km} />
+                {planet.realData.distanceFromSun_km != null && (
+                  <StatRow label={planet.isStar || planet.isGalaxy ? 'Қашықтығы' : LABELS.distanceFromSun} value={typeof planet.realData.distanceFromSun_km === 'number' ? planet.realData.distanceFromSun_km.toLocaleString() : planet.realData.distanceFromSun_km} unit={typeof planet.realData.distanceFromSun_km === 'number' ? LABELS.km : ''} />
                 )}
                 {planet.realData.orbitalPeriod_days && (
                   <StatRow label={LABELS.orbitalPeriod} value={planet.realData.orbitalPeriod_days.toLocaleString()} unit={LABELS.days} />
@@ -146,7 +159,7 @@ export default function PlanetPanel() {
                 {planet.realData.rotationPeriod_hours && (
                   <StatRow label={LABELS.rotationPeriod} value={Math.abs(planet.realData.rotationPeriod_hours)} unit={LABELS.hours} />
                 )}
-                {planet.realData.avgTemperature_c !== undefined && (
+                {planet.realData.avgTemperature_c != null && planet.realData.avgTemperature_c !== '—' && (
                   <StatRow label={LABELS.temperature} value={`${planet.realData.avgTemperature_c}°C`} />
                 )}
                 {planet.realData.gravity_ms2 && (
@@ -154,6 +167,23 @@ export default function PlanetPanel() {
                 )}
                 {planet.realData.moons_count !== undefined && (
                   <StatRow label={LABELS.moons} value={planet.realData.moons_count} />
+                )}
+                {/* Star-specific fields */}
+                {planet.realData.spectralClass && (
+                  <StatRow label="Спектрлік класы" value={planet.realData.spectralClass} />
+                )}
+                {planet.realData.luminosity && (
+                  <StatRow label="Жарықтығы" value={planet.realData.luminosity} />
+                )}
+                {planet.realData.constellation && (
+                  <StatRow label="Шоқжұлдызы" value={planet.realData.constellation} />
+                )}
+                {/* Galaxy-specific fields */}
+                {planet.realData.galaxyType && (
+                  <StatRow label="Галактика түрі" value={planet.realData.galaxyType} />
+                )}
+                {planet.realData.starCount && (
+                  <StatRow label="Жұлдыздар саны" value={planet.realData.starCount} />
                 )}
               </div>
             )}

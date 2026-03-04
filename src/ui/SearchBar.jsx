@@ -1,7 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PLANETS, LABELS } from '../data/planets';
+import { NEARBY_STARS } from '../components/Stars';
+import { GALAXY_DATA } from '../components/Galaxies';
 import useStore from '../store/useStore';
+
+const ALL_SEARCHABLE = [
+  ...PLANETS,
+  ...NEARBY_STARS,
+  ...GALAXY_DATA,
+];
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
@@ -11,20 +19,26 @@ export default function SearchBar() {
   const setCameraTarget = useStore((s) => s.setCameraTarget);
 
   const results = query.length > 0
-    ? PLANETS.filter(
+    ? ALL_SEARCHABLE.filter(
         (p) =>
           p.name.toLowerCase().includes(query.toLowerCase()) ||
-          p.nameEn.toLowerCase().includes(query.toLowerCase())
+          (p.nameEn && p.nameEn.toLowerCase().includes(query.toLowerCase()))
       )
     : [];
 
-  const selectPlanet = (planet) => {
-    setSelectedPlanet(planet);
-    // Approximate position for camera fly-to
-    setCameraTarget({
-      position: { x: planet.distance, y: 0, z: 0 },
-      radius: planet.radius,
-    });
+  const selectPlanet = (item) => {
+    setSelectedPlanet(item);
+    if (item.position) {
+      // Star or galaxy with explicit position array
+      const [x, y, z] = item.position;
+      setCameraTarget({ position: { x, y, z }, radius: (item.radius || 1) * 3 });
+    } else if (item.pos) {
+      // Galaxy with pos array
+      const [x, y, z] = item.pos;
+      setCameraTarget({ position: { x, y, z }, radius: (item.size || 20) * 0.5 });
+    } else {
+      setCameraTarget({ position: { x: item.distance, y: 0, z: 0 }, radius: item.radius });
+    }
     setQuery('');
     setOpen(false);
   };
