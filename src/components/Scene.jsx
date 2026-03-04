@@ -7,6 +7,7 @@ import Planet from './Planet';
 import Orbit from './Orbit';
 import AsteroidBelt from './AsteroidBelt';
 import StarField from './Stars';
+import Galaxies from './Galaxies';
 import useCamera from '../hooks/useCamera';
 import useStore from '../store/useStore';
 import { PLANETS } from '../data/planets';
@@ -41,15 +42,11 @@ function CameraController() {
 function SceneContent() {
   return (
     <>
-      {/* Key lighting — subtle ambient fill + hemisphere for realism */}
-      <ambientLight intensity={0.04} color="#1a1a3a" />
-      <hemisphereLight
-        color="#1a1a40"
-        groundColor="#000000"
-        intensity={0.02}
-      />
+      {/* Ambient fill — enough to see planet shapes even on the dark side */}
+      <ambientLight intensity={0.15} color="#1a1a3a" />
 
       <StarField />
+      <Galaxies />
       <Sun />
 
       {PLANETS.map((planet) => (

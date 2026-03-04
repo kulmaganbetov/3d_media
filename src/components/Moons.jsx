@@ -16,7 +16,7 @@ function Moon({ moon, isPaused, speedMultiplier }) {
   return (
     <mesh ref={ref}>
       <sphereGeometry args={[moon.radius, 24, 24]} />
-      <meshStandardMaterial color={moon.color} roughness={0.8} />
+      <meshStandardMaterial color={moon.color} emissive={moon.color} emissiveIntensity={0.08} roughness={0.85} />
     </mesh>
   );
 }
