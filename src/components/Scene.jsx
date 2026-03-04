@@ -15,7 +15,6 @@ function CameraController() {
   const controlsRef = useRef();
   const { flyToOverview } = useCamera(controlsRef);
 
-  // Double click to return to overview
   const { gl } = useThree();
   useEffect(() => {
     const handler = () => flyToOverview();
@@ -29,9 +28,9 @@ function CameraController() {
       enablePan
       enableZoom
       enableRotate
-      minDistance={5}
-      maxDistance={300}
-      zoomSpeed={0.8}
+      minDistance={3}
+      maxDistance={350}
+      zoomSpeed={1.0}
       rotateSpeed={0.5}
       enableDamping
       dampingFactor={0.05}
@@ -42,44 +41,41 @@ function CameraController() {
 function SceneContent() {
   return (
     <>
-      {/* Lighting */}
-      <ambientLight intensity={0.08} />
+      {/* Key lighting — subtle ambient fill + hemisphere for realism */}
+      <ambientLight intensity={0.04} color="#1a1a3a" />
+      <hemisphereLight
+        color="#1a1a40"
+        groundColor="#000000"
+        intensity={0.02}
+      />
 
-      {/* Stars */}
       <StarField />
-
-      {/* Sun */}
       <Sun />
 
-      {/* Orbits */}
       {PLANETS.map((planet) => (
         <Orbit
           key={`orbit-${planet.id}`}
           distance={planet.distance}
           color={planet.orbitColor}
-          opacity={planet.isDwarf ? 0.08 : 0.12}
+          opacity={planet.isDwarf ? 0.06 : 0.1}
         />
       ))}
 
-      {/* Planets */}
       {PLANETS.map((planet) => (
         <Planet key={planet.id} data={planet} />
       ))}
 
-      {/* Asteroid Belt */}
       <AsteroidBelt />
 
-      {/* Post processing */}
       <EffectComposer>
         <Bloom
-          luminanceThreshold={0.8}
-          luminanceSmoothing={0.9}
-          intensity={1.5}
+          luminanceThreshold={0.7}
+          luminanceSmoothing={0.8}
+          intensity={1.2}
           mipmapBlur
         />
       </EffectComposer>
 
-      {/* Camera */}
       <CameraController />
     </>
   );
@@ -112,21 +108,27 @@ export default function Scene() {
   const setIsLoaded = useStore((s) => s.setIsLoaded);
 
   const handleCreated = useCallback(() => {
-    // Mark loaded after a small delay to let textures start loading
-    setTimeout(() => setIsLoaded(true), 1500);
+    // Fast load — mark ready after canvas is created
+    setTimeout(() => setIsLoaded(true), 500);
   }, [setIsLoaded]);
 
   return (
     <ErrorBoundary3D>
       <Canvas
         camera={{ position: [200, 80, 200], fov: 50, near: 0.1, far: 2000 }}
-        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
-        dpr={[1, 2]}
+        gl={{
+          antialias: true,
+          alpha: false,
+          powerPreference: 'high-performance',
+          stencil: false,
+          depth: true,
+        }}
+        dpr={[1, 1.5]}
         onCreated={handleCreated}
         style={{ position: 'absolute', inset: 0 }}
+        frameloop="always"
       >
         <color attach="background" args={['#000005']} />
-        <fog attach="fog" args={['#000005', 200, 500]} />
         <Suspense fallback={null}>
           <SceneContent />
         </Suspense>

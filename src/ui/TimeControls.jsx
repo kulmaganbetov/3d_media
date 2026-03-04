@@ -21,19 +21,19 @@ export default function TimeControls() {
     setSimDate(new Date());
   };
 
+  const MONTHS_KK = [
+    'қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым',
+    'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан',
+  ];
+
   const formatDate = (d) => {
-    return d.toLocaleDateString('kk-KZ', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    if (!d || isNaN(d.getTime())) return '—';
+    return `${d.getDate()} ${MONTHS_KK[d.getMonth()]} ${d.getFullYear()}`;
   };
 
   const formatTime = (d) => {
-    return d.toLocaleTimeString('kk-KZ', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    if (!d || isNaN(d.getTime())) return '—';
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
 
   return (
@@ -111,9 +111,12 @@ export default function TimeControls() {
           >
             <input
               type="date"
-              value={simDate.toISOString().split('T')[0]}
+              value={`${simDate.getFullYear()}-${String(simDate.getMonth()+1).padStart(2,'0')}-${String(simDate.getDate()).padStart(2,'0')}`}
               onChange={(e) => {
-                setSimDate(new Date(e.target.value));
+                const parts = e.target.value.split('-');
+                if (parts.length === 3) {
+                  setSimDate(new Date(+parts[0], +parts[1] - 1, +parts[2], 12, 0, 0));
+                }
                 setShowDatePicker(false);
               }}
               className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none"
