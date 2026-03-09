@@ -73,6 +73,10 @@ export default function App() {
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
+      const targetTag = e.target?.tagName;
+      const isTypingTarget = targetTag === 'INPUT' || targetTag === 'TEXTAREA' || e.target?.isContentEditable;
+      if (isTypingTarget) return;
+
       // ESC - deselect
       if (e.key === 'Escape') {
         setSelectedPlanet(null);
@@ -84,8 +88,8 @@ export default function App() {
         togglePause();
       }
       // Numbers 1-9 to jump to planets
-      const num = parseInt(e.key);
-      if (num >= 1 && num <= 9 && PLANETS[num - 1]) {
+      if (/^[1-9]$/.test(e.key) && PLANETS[Number(e.key) - 1]) {
+        const num = Number(e.key);
         const planet = PLANETS[num - 1];
         setSelectedPlanet(planet);
         setCameraTarget({

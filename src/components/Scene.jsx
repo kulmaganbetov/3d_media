@@ -1,7 +1,10 @@
-import React, { useRef, Suspense, useEffect, useCallback } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import React, { useRef, Suspense, useEffect, useCallback, useMemo } from 'react';
+import { Canvas, useThree, useFrame, extend } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import * as THREE from 'three';
+import { EffectComposer as ThreeEffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import Sun from './Sun';
 import Planet from './Planet';
 import Orbit from './Orbit';
@@ -11,6 +14,8 @@ import Galaxies from './Galaxies';
 import useCamera from '../hooks/useCamera';
 import useStore from '../store/useStore';
 import { PLANETS } from '../data/planets';
+
+extend({ UnrealBloomPass });
 
 function CameraController() {
   const controlsRef = useRef();
@@ -39,23 +44,46 @@ function CameraController() {
   );
 }
 
+function UnrealBloomEffect() {
+  const { gl, scene, camera, size } = useThree();
+  const composerRef = useRef();
+
+  const bloomPass = useMemo(
+    () => new UnrealBloomPass(new THREE.Vector2(size.width, size.height), 1.5, 0.45, 0.85),
+    [size.width, size.height]
+  );
+
+  useEffect(() => {
+    const composer = new ThreeEffectComposer(gl);
+    composer.addPass(new RenderPass(scene, camera));
+    composer.addPass(bloomPass);
+    composerRef.current = composer;
+    return () => composer.dispose();
+  }, [gl, scene, camera, bloomPass]);
+
+  useEffect(() => {
+    bloomPass.setSize(size.width, size.height);
+    if (composerRef.current) composerRef.current.setSize(size.width, size.height);
+  }, [size, bloomPass]);
+
+  useFrame(() => {
+    if (composerRef.current) composerRef.current.render();
+  }, 1);
+
+  return null;
+}
+
 function SceneContent() {
   return (
     <>
-      {/* Ambient fill — enough to see planet shapes even on the dark side */}
-      <ambientLight intensity={0.15} color="#1a1a3a" />
+      <ambientLight intensity={0.05} color="#1a2238" />
 
       <StarField />
       <Galaxies />
       <Sun />
 
       {PLANETS.map((planet) => (
-        <Orbit
-          key={`orbit-${planet.id}`}
-          distance={planet.distance}
-          color={planet.orbitColor}
-          opacity={planet.isDwarf ? 0.06 : 0.1}
-        />
+        <Orbit key={`orbit-${planet.id}`} distance={planet.distance} color={planet.orbitColor} opacity={planet.isDwarf ? 0.04 : 0.08} />
       ))}
 
       {PLANETS.map((planet) => (
@@ -63,16 +91,7 @@ function SceneContent() {
       ))}
 
       <AsteroidBelt />
-
-      <EffectComposer>
-        <Bloom
-          luminanceThreshold={0.7}
-          luminanceSmoothing={0.8}
-          intensity={1.2}
-          mipmapBlur
-        />
-      </EffectComposer>
-
+      <UnrealBloomEffect />
       <CameraController />
     </>
   );
@@ -103,29 +122,27 @@ class ErrorBoundary3D extends React.Component {
 
 export default function Scene() {
   const setIsLoaded = useStore((s) => s.setIsLoaded);
+  const loadTimerRef = useRef(null);
 
   const handleCreated = useCallback(() => {
-    // Fast load — mark ready after canvas is created
-    setTimeout(() => setIsLoaded(true), 500);
+    loadTimerRef.current = setTimeout(() => setIsLoaded(true), 500);
   }, [setIsLoaded]);
+
+  useEffect(() => () => {
+    if (loadTimerRef.current) clearTimeout(loadTimerRef.current);
+  }, []);
 
   return (
     <ErrorBoundary3D>
       <Canvas
-        camera={{ position: [200, 80, 200], fov: 50, near: 0.1, far: 2000 }}
-        gl={{
-          antialias: true,
-          alpha: false,
-          powerPreference: 'high-performance',
-          stencil: false,
-          depth: true,
-        }}
+        camera={{ position: [200, 80, 200], fov: 50, near: 0.1, far: 2400 }}
+        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', stencil: false, depth: true }}
         dpr={[1, 1.5]}
         onCreated={handleCreated}
         style={{ position: 'absolute', inset: 0 }}
         frameloop="always"
       >
-        <color attach="background" args={['#000005']} />
+        <color attach="background" args={['#000006']} />
         <Suspense fallback={null}>
           <SceneContent />
         </Suspense>

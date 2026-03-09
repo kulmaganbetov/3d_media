@@ -1,38 +1,54 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { SUN_DATA } from '../data/planets';
-import { SunGlowMaterial } from '../shaders/glowShader';
 import useStore from '../store/useStore';
+
+const textureCache = {};
+
+function useTexture(url) {
+  const [texture, setTexture] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!url) return;
+    if (textureCache[url]) {
+      if (textureCache[url] !== 'failed') setTexture(textureCache[url]);
+      return;
+    }
+
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin('anonymous');
+    loader.load(
+      url,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = 8;
+        textureCache[url] = tex;
+        setTexture(tex);
+      },
+      undefined,
+      () => {
+        textureCache[url] = 'failed';
+      }
+    );
+  }, [url]);
+
+  return texture;
+}
 
 const Sun = React.memo(function Sun() {
   const meshRef = useRef();
   const glowRef = useRef();
-  const materialRef = useRef();
   const setSelectedPlanet = useStore((s) => s.setSelectedPlanet);
   const setCameraTarget = useStore((s) => s.setCameraTarget);
-
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uColor1: { value: new THREE.Color('#FDB813') },
-      uColor2: { value: new THREE.Color('#ff6600') },
-      uIntensity: { value: 1.8 },
-    }),
-    []
-  );
+  const sunTexture = useTexture(SUN_DATA.textureUrl);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
-    if (materialRef.current) {
-      materialRef.current.uniforms.uTime.value = t;
-    }
-    if (meshRef.current) {
-      meshRef.current.rotation.y = t * 0.03;
-    }
+    if (meshRef.current) meshRef.current.rotation.y = t * 0.02;
     if (glowRef.current) {
-      const s = 1.0 + Math.sin(t * 1.5) * 0.02;
+      const s = 1.0 + Math.sin(t * 1.4) * 0.025;
       glowRef.current.scale.setScalar(s);
     }
   });
@@ -45,40 +61,18 @@ const Sun = React.memo(function Sun() {
 
   return (
     <group>
-      {/* Sun sphere with procedural shader */}
       <mesh ref={meshRef} onClick={handleClick}>
-        <sphereGeometry args={[SUN_DATA.radius, 64, 64]} />
-        <shaderMaterial
-          ref={materialRef}
-          vertexShader={SunGlowMaterial.vertexShader}
-          fragmentShader={SunGlowMaterial.fragmentShader}
-          uniforms={uniforms}
-        />
+        <sphereGeometry args={[SUN_DATA.radius, 128, 128]} />
+        <meshBasicMaterial map={sunTexture || null} color={sunTexture ? '#ffffff' : '#FDB813'} />
       </mesh>
 
-      {/* Inner corona */}
       <mesh ref={glowRef}>
-        <sphereGeometry args={[SUN_DATA.radius * 1.15, 32, 32]} />
-        <meshBasicMaterial color="#FDB813" transparent opacity={0.12} side={THREE.BackSide} />
+        <sphereGeometry args={[SUN_DATA.radius * 1.2, 64, 64]} />
+        <meshBasicMaterial color="#ffbb55" transparent opacity={0.16} side={THREE.BackSide} />
       </mesh>
 
-      {/* Outer corona */}
-      <mesh>
-        <sphereGeometry args={[SUN_DATA.radius * 1.6, 32, 32]} />
-        <meshBasicMaterial color="#ff9900" transparent opacity={0.04} side={THREE.BackSide} />
-      </mesh>
+      <pointLight color="#fff5d6" intensity={9} distance={0} decay={1.2} />
 
-      {/* Faint outermost glow */}
-      <mesh>
-        <sphereGeometry args={[SUN_DATA.radius * 2.5, 16, 16]} />
-        <meshBasicMaterial color="#ff6600" transparent opacity={0.015} side={THREE.BackSide} />
-      </mesh>
-
-      {/* Primary sun light — strong, far reach */}
-      <pointLight color="#fff5e0" intensity={6} distance={0} decay={1} />
-      <pointLight color="#FFD080" intensity={2} distance={0} decay={1.5} />
-
-      {/* Label */}
       <Html position={[0, SUN_DATA.radius + 2, 0]} center distanceFactor={60}>
         <div
           className="text-yellow-300 text-sm font-semibold pointer-events-none select-none whitespace-nowrap"
