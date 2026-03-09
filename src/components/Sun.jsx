@@ -70,7 +70,7 @@ const Sun = React.memo(function Sun() {
         <meshBasicMaterial color="#ffbb55" transparent opacity={0.16} side={THREE.BackSide} />
       </mesh>
 
-      <pointLight color="#fff5d6" intensity={9} distance={0} decay={1.2} />
+      <pointLight color="#fff5d6" intensity={12} distance={0} decay={0.8} />
 
       <Html position={[0, SUN_DATA.radius + 2, 0]} center distanceFactor={60}>
         <div
