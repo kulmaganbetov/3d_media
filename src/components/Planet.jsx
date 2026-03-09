@@ -7,11 +7,11 @@ import Moons from './Moons';
 
 const textureCache = {};
 const J2000_MS = new Date('2000-01-01T12:00:00Z').getTime();
-const TEX = 'https://www.solarsystemscope.com/textures/download';
+const TEX = '/api/textures';
 
 const PLANET_TEXTURES = {
   mercury: { map: `${TEX}/2k_mercury.jpg`, normal: `${TEX}/2k_mercury.jpg` },
-  venus: { map: `${TEX}/2k_venus_surface.jpg` },
+  venus: { map: `${TEX}/2k_venus_surface.jpg`, atmosphere: `${TEX}/2k_venus_atmosphere.jpg` },
   earth: { map: `${TEX}/2k_earth_daymap.jpg`, normal: `${TEX}/2k_earth_normal_map.jpg`, specular: `${TEX}/2k_earth_specular_map.jpg` },
   mars: { map: `${TEX}/2k_mars.jpg`, normal: `${TEX}/2k_mars.jpg` },
   jupiter: { map: `${TEX}/2k_jupiter.jpg` },
@@ -44,7 +44,6 @@ function useTexture(url) {
     }
 
     const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin('anonymous');
     loader.load(
       url,
       (tex) => {
@@ -80,9 +79,8 @@ const Planet = React.memo(function Planet({ data }) {
   const colorMap = useTexture(textureSet.map || data.textureUrl);
   const normalMap = useTexture(textureSet.normal);
   const specularMap = useTexture(textureSet.specular);
-  const saturnRingMapPng = useTexture(`${TEX}/2k_saturn_ring_alpha.png`);
-  const saturnRingMapJpg = useTexture(`${TEX}/2k_saturn_ring_alpha.jpg`);
-  const saturnRingMap = saturnRingMapPng || saturnRingMapJpg;
+  const ringUrl = data.hasRings ? `${TEX}/2k_saturn_ring_alpha.png` : null;
+  const saturnRingMap = useTexture(ringUrl);
 
   const orbitalPeriod = data.realData.orbitalPeriod_days;
   const angleOffset = useMemo(() => Math.random() * Math.PI * 2, [data.id]);

@@ -1,4 +1,4 @@
-const TEX = 'https://www.solarsystemscope.com/textures/download';
+const TEX = '/api/textures';
 
 export const SUN_DATA = {
   name: 'Күн',

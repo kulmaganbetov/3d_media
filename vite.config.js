@@ -16,5 +16,12 @@ export default defineConfig({
   },
   server: {
     host: true,
+    proxy: {
+      '/api/textures': {
+        target: 'https://www.solarsystemscope.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/textures/, '/textures/download'),
+      },
+    },
   },
 });

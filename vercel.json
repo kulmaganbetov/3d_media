@@ -1,3 +1,9 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/api/textures/:path*",
+      "destination": "https://www.solarsystemscope.com/textures/download/:path*"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
