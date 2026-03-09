@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import useStore from '../store/useStore';
@@ -218,9 +219,12 @@ const StarField = React.memo(function StarField() {
   const setCameraTarget = useStore((s) => s.setCameraTarget);
   const introDone = useStore((s) => s.introDone);
 
-  const { positions, colors } = useMemo(() => {
+  const pointsRef = useRef();
+
+  const { positions, colors, sizes } = useMemo(() => {
     const pos = new Float32Array(STAR_COUNT * 3);
     const col = new Float32Array(STAR_COUNT * 3);
+    const sz = new Float32Array(STAR_COUNT);
 
     for (let i = 0; i < STAR_COUNT; i++) {
       const theta = Math.random() * Math.PI * 2;
@@ -250,10 +254,17 @@ const StarField = React.memo(function StarField() {
         col[i * 3 + 1] = 0.6 + Math.random() * 0.2;
         col[i * 3 + 2] = 0.4 + Math.random() * 0.2;
       }
+
+      sz[i] = 0.8 + Math.random() * 2.4;
     }
 
-    return { positions: pos, colors: col };
+    return { positions: pos, colors: col, sizes: sz };
   }, []);
+
+  useFrame(({ clock }) => {
+    if (!pointsRef.current) return;
+    pointsRef.current.material.opacity = 0.72 + Math.sin(clock.elapsedTime * 0.35) * 0.12;
+  });
 
   const handleStarClick = (star, e) => {
     e.stopPropagation();
@@ -267,7 +278,7 @@ const StarField = React.memo(function StarField() {
   return (
     <group>
       {/* Background points */}
-      <points>
+      <points ref={pointsRef}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
@@ -281,14 +292,21 @@ const StarField = React.memo(function StarField() {
             array={colors}
             itemSize={3}
           />
+          <bufferAttribute
+            attach="attributes-size"
+            count={STAR_COUNT}
+            array={sizes}
+            itemSize={1}
+          />
         </bufferGeometry>
         <pointsMaterial
-          size={1.8}
+          size={2.3}
           vertexColors
           transparent
-          opacity={0.9}
+          opacity={0.8}
           sizeAttenuation
           depthWrite={false}
+          blending={THREE.AdditiveBlending}
         />
       </points>
 

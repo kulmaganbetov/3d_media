@@ -103,11 +103,16 @@ class ErrorBoundary3D extends React.Component {
 
 export default function Scene() {
   const setIsLoaded = useStore((s) => s.setIsLoaded);
+  const loadTimerRef = useRef(null);
 
   const handleCreated = useCallback(() => {
     // Fast load — mark ready after canvas is created
-    setTimeout(() => setIsLoaded(true), 500);
+    loadTimerRef.current = setTimeout(() => setIsLoaded(true), 500);
   }, [setIsLoaded]);
+
+  useEffect(() => () => {
+    if (loadTimerRef.current) clearTimeout(loadTimerRef.current);
+  }, []);
 
   return (
     <ErrorBoundary3D>

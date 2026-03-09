@@ -21,6 +21,112 @@ const PLANET_MATERIALS = {
   pluto:   { emissive: '#181510', emissiveI: 0.08, roughness: 0.9, metalness: 0.05 },
 };
 
+function mulberry32(seed) {
+  return function rand() {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hashString(value) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function mixColor(a, b, t) {
+  return new THREE.Color(a).lerp(new THREE.Color(b), t);
+}
+
+function createPlanetPatternTexture(planetId, baseColor) {
+  const size = 1024;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const rand = mulberry32(hashString(planetId));
+
+  const base = new THREE.Color(baseColor);
+  const dark = mixColor(base, '#050505', 0.35);
+  const light = mixColor(base, '#ffffff', 0.2);
+
+  const bg = ctx.createLinearGradient(0, 0, 0, size);
+  bg.addColorStop(0, `#${dark.getHexString()}`);
+  bg.addColorStop(0.5, `#${base.getHexString()}`);
+  bg.addColorStop(1, `#${light.getHexString()}`);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, size, size);
+
+  const drawNoise = (count, alpha, radius) => {
+    for (let i = 0; i < count; i++) {
+      const x = rand() * size;
+      const y = rand() * size;
+      const r = radius * (0.4 + rand());
+      const c = mixColor(dark, light, rand());
+      ctx.fillStyle = `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  };
+
+  const drawBands = (count, amp, thickness, alpha) => {
+    for (let i = 0; i < count; i++) {
+      const y = (i / count) * size;
+      const curve = (rand() - 0.5) * amp;
+      const c = mixColor(dark, light, rand());
+      ctx.fillStyle = `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${alpha})`;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.quadraticCurveTo(size * 0.5, y + curve, size, y);
+      ctx.lineTo(size, y + thickness);
+      ctx.quadraticCurveTo(size * 0.5, y + thickness + curve, 0, y + thickness);
+      ctx.closePath();
+      ctx.fill();
+    }
+  };
+
+  if (['jupiter', 'saturn', 'uranus', 'neptune'].includes(planetId)) {
+    drawBands(28, 20, 26, 0.33);
+    drawNoise(250, 0.08, 12);
+  } else if (planetId === 'earth') {
+    drawNoise(150, 0.25, 20);
+    ctx.fillStyle = 'rgba(240, 240, 255, 0.22)';
+    for (let i = 0; i < 50; i++) {
+      ctx.beginPath();
+      ctx.arc(rand() * size, rand() * size, 16 + rand() * 26, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (planetId === 'venus') {
+    drawNoise(260, 0.16, 18);
+    drawBands(20, 14, 22, 0.18);
+  } else {
+    drawNoise(350, 0.18, 14);
+    for (let i = 0; i < 28; i++) {
+      const x = rand() * size;
+      const y = rand() * size;
+      const r = 12 + rand() * 28;
+      ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.anisotropy = 4;
+  return texture;
+}
+
 function usePlanetTexture(url) {
   const [texture, setTexture] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -79,6 +185,10 @@ const Planet = React.memo(function Planet({ data }) {
   const introDone = useStore((s) => s.introDone);
 
   const { texture, failed } = usePlanetTexture(data.textureUrl);
+  const fallbackTexture = useMemo(
+    () => createPlanetPatternTexture(data.id, data.color),
+    [data.id, data.color]
+  );
 
   const orbitalPeriod = data.realData.orbitalPeriod_days;
   const angleOffset = useMemo(() => Math.random() * Math.PI * 2, [data.id]);
@@ -130,7 +240,7 @@ const Planet = React.memo(function Planet({ data }) {
     setCameraTarget({ position: posRef.current.clone(), radius: data.radius });
   };
 
-  const hasTexture = texture && !failed;
+  const effectiveTexture = texture && !failed ? texture : fallbackTexture;
 
   return (
     <group ref={groupRef}>
@@ -138,10 +248,10 @@ const Planet = React.memo(function Planet({ data }) {
       <mesh ref={meshRef} onClick={handleClick}>
         <sphereGeometry args={[data.radius, segments, segments]} />
         <meshStandardMaterial
-          map={hasTexture ? texture : null}
+          map={effectiveTexture}
           color={data.color}
           emissive={matProps.emissive}
-          emissiveIntensity={hasTexture ? matProps.emissiveI * 0.5 : matProps.emissiveI}
+          emissiveIntensity={texture && !failed ? matProps.emissiveI * 0.5 : matProps.emissiveI}
           roughness={matProps.roughness}
           metalness={matProps.metalness}
         />
