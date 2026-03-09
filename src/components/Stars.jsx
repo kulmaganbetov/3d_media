@@ -4,7 +4,40 @@ import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import useStore from '../store/useStore';
 
-const STAR_COUNT = 3000;
+const STAR_COUNT = 2500;
+
+
+const textureCache = {};
+
+function useTexture(url) {
+  const [texture, setTexture] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!url) return;
+    if (textureCache[url]) {
+      if (textureCache[url] !== 'failed') setTexture(textureCache[url]);
+      return;
+    }
+
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin('anonymous');
+    loader.load(
+      url,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = 4;
+        textureCache[url] = tex;
+        setTexture(tex);
+      },
+      undefined,
+      () => {
+        textureCache[url] = 'failed';
+      }
+    );
+  }, [url]);
+
+  return texture;
+}
 
 // Nearby real stars with data (in Kazakh)
 export const NEARBY_STARS = [
@@ -220,6 +253,7 @@ const StarField = React.memo(function StarField() {
   const introDone = useStore((s) => s.introDone);
 
   const pointsRef = useRef();
+  const skyTexture = useTexture('https://www.solarsystemscope.com/textures/download/8k_stars_milky_way.jpg');
 
   const { positions, colors, sizes } = useMemo(() => {
     const pos = new Float32Array(STAR_COUNT * 3);
@@ -277,6 +311,12 @@ const StarField = React.memo(function StarField() {
 
   return (
     <group>
+      {/* Space sky sphere */}
+      <mesh scale={[-1, 1, 1]}>
+        <sphereGeometry args={[900, 64, 64]} />
+        <meshBasicMaterial map={skyTexture || null} color={skyTexture ? "#ffffff" : "#02030a"} side={THREE.BackSide} />
+      </mesh>
+
       {/* Background points */}
       <points ref={pointsRef}>
         <bufferGeometry>

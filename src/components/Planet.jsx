@@ -7,168 +7,60 @@ import Moons from './Moons';
 
 const textureCache = {};
 const J2000_MS = new Date('2000-01-01T12:00:00Z').getTime();
+const TEX = 'https://www.solarsystemscope.com/textures/download';
 
-// Planet-specific material properties for realistic look without textures
-const PLANET_MATERIALS = {
-  mercury: { emissive: '#2a2420', emissiveI: 0.08, roughness: 0.95, metalness: 0.1 },
-  venus:   { emissive: '#3a2810', emissiveI: 0.12, roughness: 0.6, metalness: 0.0 },
-  earth:   { emissive: '#0a1530', emissiveI: 0.1, roughness: 0.7, metalness: 0.05 },
-  mars:    { emissive: '#2a0800', emissiveI: 0.1, roughness: 0.9, metalness: 0.05 },
-  jupiter: { emissive: '#1a1008', emissiveI: 0.1, roughness: 0.5, metalness: 0.0 },
-  saturn:  { emissive: '#1a1508', emissiveI: 0.1, roughness: 0.5, metalness: 0.0 },
-  uranus:  { emissive: '#081820', emissiveI: 0.15, roughness: 0.4, metalness: 0.0 },
-  neptune: { emissive: '#080830', emissiveI: 0.15, roughness: 0.4, metalness: 0.0 },
-  pluto:   { emissive: '#181510', emissiveI: 0.08, roughness: 0.9, metalness: 0.05 },
+const PLANET_TEXTURES = {
+  mercury: { map: `${TEX}/2k_mercury.jpg`, normal: `${TEX}/2k_mercury.jpg` },
+  venus: { map: `${TEX}/2k_venus_surface.jpg` },
+  earth: { map: `${TEX}/2k_earth_daymap.jpg`, normal: `${TEX}/2k_earth_normal_map.jpg`, specular: `${TEX}/2k_earth_specular_map.jpg` },
+  mars: { map: `${TEX}/2k_mars.jpg`, normal: `${TEX}/2k_mars.jpg` },
+  jupiter: { map: `${TEX}/2k_jupiter.jpg` },
+  saturn: { map: `${TEX}/2k_saturn.jpg` },
+  uranus: { map: `${TEX}/2k_uranus.jpg` },
+  neptune: { map: `${TEX}/2k_neptune.jpg` },
+  pluto: { map: `${TEX}/2k_makemake_fictional.jpg` },
 };
 
-function mulberry32(seed) {
-  return function rand() {
-    let t = (seed += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+const PLANET_MATERIALS = {
+  mercury: { roughness: 1.0, metalness: 0.05, bumpScale: 0.05 },
+  venus: { roughness: 0.9, metalness: 0.0 },
+  earth: { roughness: 0.8, metalness: 0.05, bumpScale: 0.04 },
+  mars: { roughness: 0.95, metalness: 0.0, bumpScale: 0.05 },
+  jupiter: { roughness: 0.85, metalness: 0.0 },
+  saturn: { roughness: 0.9, metalness: 0.0 },
+  uranus: { roughness: 0.85, metalness: 0.0 },
+  neptune: { roughness: 0.85, metalness: 0.0 },
+  pluto: { roughness: 0.95, metalness: 0.0 },
+};
 
-function hashString(value) {
-  let hash = 2166136261;
-  for (let i = 0; i < value.length; i++) {
-    hash ^= value.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-function mixColor(a, b, t) {
-  return new THREE.Color(a).lerp(new THREE.Color(b), t);
-}
-
-function createPlanetPatternTexture(planetId, baseColor) {
-  const size = 1024;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  const rand = mulberry32(hashString(planetId));
-
-  const base = new THREE.Color(baseColor);
-  const dark = mixColor(base, '#050505', 0.35);
-  const light = mixColor(base, '#ffffff', 0.2);
-
-  const bg = ctx.createLinearGradient(0, 0, 0, size);
-  bg.addColorStop(0, `#${dark.getHexString()}`);
-  bg.addColorStop(0.5, `#${base.getHexString()}`);
-  bg.addColorStop(1, `#${light.getHexString()}`);
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, size, size);
-
-  const drawNoise = (count, alpha, radius) => {
-    for (let i = 0; i < count; i++) {
-      const x = rand() * size;
-      const y = rand() * size;
-      const r = radius * (0.4 + rand());
-      const c = mixColor(dark, light, rand());
-      ctx.fillStyle = `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${alpha})`;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  };
-
-  const drawBands = (count, amp, thickness, alpha) => {
-    for (let i = 0; i < count; i++) {
-      const y = (i / count) * size;
-      const curve = (rand() - 0.5) * amp;
-      const c = mixColor(dark, light, rand());
-      ctx.fillStyle = `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${alpha})`;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.quadraticCurveTo(size * 0.5, y + curve, size, y);
-      ctx.lineTo(size, y + thickness);
-      ctx.quadraticCurveTo(size * 0.5, y + thickness + curve, 0, y + thickness);
-      ctx.closePath();
-      ctx.fill();
-    }
-  };
-
-  if (['jupiter', 'saturn', 'uranus', 'neptune'].includes(planetId)) {
-    drawBands(28, 20, 26, 0.33);
-    drawNoise(250, 0.08, 12);
-  } else if (planetId === 'earth') {
-    drawNoise(150, 0.25, 20);
-    ctx.fillStyle = 'rgba(240, 240, 255, 0.22)';
-    for (let i = 0; i < 50; i++) {
-      ctx.beginPath();
-      ctx.arc(rand() * size, rand() * size, 16 + rand() * 26, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  } else if (planetId === 'venus') {
-    drawNoise(260, 0.16, 18);
-    drawBands(20, 14, 22, 0.18);
-  } else {
-    drawNoise(350, 0.18, 14);
-    for (let i = 0; i < 28; i++) {
-      const x = rand() * size;
-      const y = rand() * size;
-      const r = 12 + rand() * 28;
-      ctx.strokeStyle = 'rgba(0,0,0,0.18)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  }
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.ClampToEdgeWrapping;
-  texture.anisotropy = 4;
-  return texture;
-}
-
-function usePlanetTexture(url) {
+function useTexture(url) {
   const [texture, setTexture] = useState(null);
-  const [failed, setFailed] = useState(false);
 
   React.useEffect(() => {
-    if (!url) { setFailed(true); return; }
+    if (!url) return;
     if (textureCache[url]) {
-      if (textureCache[url] === 'failed') { setFailed(true); return; }
-      setTexture(textureCache[url]);
+      if (textureCache[url] !== 'failed') setTexture(textureCache[url]);
       return;
     }
 
     const loader = new THREE.TextureLoader();
     loader.setCrossOrigin('anonymous');
-
-    // Timeout — if texture doesn't load in 8s, use fallback
-    const timeout = setTimeout(() => {
-      textureCache[url] = 'failed';
-      setFailed(true);
-    }, 8000);
-
     loader.load(
       url,
       (tex) => {
-        clearTimeout(timeout);
         tex.colorSpace = THREE.SRGBColorSpace;
-        tex.anisotropy = 4;
+        tex.anisotropy = 8;
         textureCache[url] = tex;
         setTexture(tex);
       },
       undefined,
       () => {
-        clearTimeout(timeout);
         textureCache[url] = 'failed';
-        setFailed(true);
       }
     );
-
-    return () => clearTimeout(timeout);
   }, [url]);
 
-  return { texture, failed };
+  return texture;
 }
 
 const Planet = React.memo(function Planet({ data }) {
@@ -184,31 +76,19 @@ const Planet = React.memo(function Planet({ data }) {
   const setCameraTarget = useStore((s) => s.setCameraTarget);
   const introDone = useStore((s) => s.introDone);
 
-  const { texture, failed } = usePlanetTexture(data.textureUrl);
-  const fallbackTexture = useMemo(
-    () => createPlanetPatternTexture(data.id, data.color),
-    [data.id, data.color]
-  );
+  const textureSet = PLANET_TEXTURES[data.id] || { map: data.textureUrl };
+  const colorMap = useTexture(textureSet.map || data.textureUrl);
+  const normalMap = useTexture(textureSet.normal);
+  const specularMap = useTexture(textureSet.specular);
+  const saturnRingMapPng = useTexture(`${TEX}/2k_saturn_ring_alpha.png`);
+  const saturnRingMapJpg = useTexture(`${TEX}/2k_saturn_ring_alpha.jpg`);
+  const saturnRingMap = saturnRingMapPng || saturnRingMapJpg;
 
   const orbitalPeriod = data.realData.orbitalPeriod_days;
   const angleOffset = useMemo(() => Math.random() * Math.PI * 2, [data.id]);
 
-  const segments = data.radius > 2 ? 64 : data.radius > 1 ? 48 : 32;
-
+  const segments = 96;
   const matProps = PLANET_MATERIALS[data.id] || PLANET_MATERIALS.mercury;
-
-  // Atmosphere color for planets with thick atmospheres
-  const atmosphereColor = useMemo(() => {
-    const colors = {
-      earth: '#4488ff',
-      venus: '#e8a050',
-      jupiter: '#c89040',
-      saturn: '#d4b060',
-      uranus: '#60ccee',
-      neptune: '#3366dd',
-    };
-    return colors[data.id] || null;
-  }, [data.id]);
 
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
@@ -240,113 +120,62 @@ const Planet = React.memo(function Planet({ data }) {
     setCameraTarget({ position: posRef.current.clone(), radius: data.radius });
   };
 
-  const effectiveTexture = texture && !failed ? texture : fallbackTexture;
-
   return (
     <group ref={groupRef}>
-      {/* Planet body */}
       <mesh ref={meshRef} onClick={handleClick}>
         <sphereGeometry args={[data.radius, segments, segments]} />
         <meshStandardMaterial
-          map={effectiveTexture}
-          color={data.color}
-          emissive={matProps.emissive}
-          emissiveIntensity={texture && !failed ? matProps.emissiveI * 0.5 : matProps.emissiveI}
+          map={colorMap || null}
+          normalMap={normalMap || null}
+          bumpMap={!normalMap ? colorMap || null : null}
+          bumpScale={matProps.bumpScale || 0}
+          roughnessMap={specularMap || null}
+          color={colorMap ? '#ffffff' : data.color}
           roughness={matProps.roughness}
           metalness={matProps.metalness}
         />
       </mesh>
 
-      {/* Atmosphere glow */}
-      {atmosphereColor && (
+      {data.id === 'earth' && (
         <mesh scale={1.04}>
-          <sphereGeometry args={[data.radius, 32, 32]} />
-          <meshBasicMaterial
-            color={atmosphereColor}
+          <sphereGeometry args={[data.radius, 96, 96]} />
+          <meshPhongMaterial
+            color="#66aaff"
             transparent
-            opacity={0.1}
+            opacity={0.15}
             side={THREE.BackSide}
+            blending={THREE.AdditiveBlending}
           />
         </mesh>
       )}
 
-      {/* Rim light */}
-      <mesh scale={1.02}>
-        <sphereGeometry args={[data.radius, 24, 24]} />
-        <meshBasicMaterial
-          color={data.color}
-          transparent
-          opacity={0.06}
-          side={THREE.BackSide}
-        />
-      </mesh>
-
-      {/* Saturn rings */}
       {data.hasRings && (
         <group rotation={[-Math.PI * 0.4, 0, 0]}>
           <mesh>
-            <ringGeometry args={[data.radius * 1.3, data.radius * 1.8, 128]} />
+            <ringGeometry args={[data.radius * 1.25, data.radius * 2.15, 256]} />
             <meshStandardMaterial
-              color="#d4b878"
-              emissive="#2a2010"
-              emissiveIntensity={0.15}
+              map={saturnRingMap || null}
+              color="#d8c08a"
               transparent
-              opacity={0.6}
+              opacity={0.9}
               side={THREE.DoubleSide}
+              alphaTest={0.2}
               roughness={0.9}
-            />
-          </mesh>
-          <mesh>
-            <ringGeometry args={[data.radius * 1.85, data.radius * 2.3, 128]} />
-            <meshStandardMaterial
-              color="#c0a060"
-              emissive="#1a1508"
-              emissiveIntensity={0.1}
-              transparent
-              opacity={0.4}
-              side={THREE.DoubleSide}
-              roughness={0.9}
-            />
-          </mesh>
-          <mesh>
-            <ringGeometry args={[data.radius * 2.35, data.radius * 2.6, 128]} />
-            <meshStandardMaterial
-              color="#a8905a"
-              emissive="#100c05"
-              emissiveIntensity={0.08}
-              transparent
-              opacity={0.25}
-              side={THREE.DoubleSide}
-              roughness={0.9}
+              metalness={0}
             />
           </mesh>
         </group>
       )}
 
-      {/* Moons */}
-      {data.moons && (
-        <Moons
-          moons={data.moons}
-          parentRadius={data.radius}
-          isPaused={isPaused}
-          speedMultiplier={speedMultiplier}
-        />
-      )}
-
-      {/* Label */}
       {introDone && (
-        <Html position={[0, data.radius + 0.8, 0]} center distanceFactor={40}>
-          <div
-            className="text-accent text-xs font-medium pointer-events-none select-none whitespace-nowrap"
-            style={{ textShadow: '0 0 8px rgba(0,212,255,0.6)' }}
-          >
+        <Html position={[0, data.radius + 1.1, 0]} center distanceFactor={40}>
+          <div className="text-[10px] px-2 py-1 rounded-full bg-black/40 border border-white/10 text-gray-200 pointer-events-none select-none whitespace-nowrap">
             {data.name}
-            {data.isDwarf && (
-              <span className="text-gray-500 text-[10px] ml-1">(ергежейлі)</span>
-            )}
           </div>
         </Html>
       )}
+
+      {data.moons && <Moons parentData={data} />}
     </group>
   );
 });
