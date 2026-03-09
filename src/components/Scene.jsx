@@ -42,7 +42,8 @@ function CameraController() {
 function SceneContent() {
   return (
     <>
-      <ambientLight intensity={0.25} color="#c8d4ff" />
+      <ambientLight intensity={0.35} color="#c8d4ff" />
+      <hemisphereLight args={['#c8d4ff', '#1a1025', 0.15]} />
 
       <StarField />
       <Galaxies />

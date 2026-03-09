@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState } from 'react';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -10,15 +10,15 @@ const J2000_MS = new Date('2000-01-01T12:00:00Z').getTime();
 const TEX = '/api/textures';
 
 const PLANET_TEXTURES = {
-  mercury: { map: `${TEX}/2k_mercury.jpg`, normal: `${TEX}/2k_mercury.jpg` },
-  venus: { map: `${TEX}/2k_venus_surface.jpg`, atmosphere: `${TEX}/2k_venus_atmosphere.jpg` },
-  earth: { map: `${TEX}/2k_earth_daymap.jpg`, normal: `${TEX}/2k_earth_normal_map.jpg`, specular: `${TEX}/2k_earth_specular_map.jpg` },
-  mars: { map: `${TEX}/2k_mars.jpg`, normal: `${TEX}/2k_mars.jpg` },
+  mercury: { map: `${TEX}/2k_mercury.jpg` },
+  venus:   { map: `${TEX}/2k_venus_surface.jpg` },
+  earth:   { map: `${TEX}/2k_earth_daymap.jpg`, normal: `${TEX}/2k_earth_normal_map.jpg`, specular: `${TEX}/2k_earth_specular_map.jpg` },
+  mars:    { map: `${TEX}/2k_mars.jpg` },
   jupiter: { map: `${TEX}/2k_jupiter.jpg` },
-  saturn: { map: `${TEX}/2k_saturn.jpg` },
-  uranus: { map: `${TEX}/2k_uranus.jpg` },
+  saturn:  { map: `${TEX}/2k_saturn.jpg` },
+  uranus:  { map: `${TEX}/2k_uranus.jpg` },
   neptune: { map: `${TEX}/2k_neptune.jpg` },
-  pluto: { map: `${TEX}/2k_makemake_fictional.jpg` },
+  pluto:   { map: `${TEX}/2k_makemake_fictional.jpg` },
 };
 
 const PLANET_MATERIALS = {
@@ -33,31 +33,44 @@ const PLANET_MATERIALS = {
   pluto:   { roughness: 0.95, metalness: 0.0,                   emissive: '#10100c', emissiveIntensity: 0.10 },
 };
 
-function useTexture(url) {
-  const [texture, setTexture] = useState(null);
-
-  React.useEffect(() => {
-    if (!url) return;
+function loadTexture(url, isSRGB) {
+  return new Promise((resolve, reject) => {
     if (textureCache[url]) {
-      if (textureCache[url] !== 'failed') setTexture(textureCache[url]);
+      if (textureCache[url] === 'failed') reject();
+      else resolve(textureCache[url]);
       return;
     }
-
     const loader = new THREE.TextureLoader();
     loader.load(
       url,
       (tex) => {
-        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.LinearSRGBColorSpace;
         tex.anisotropy = 8;
         textureCache[url] = tex;
-        setTexture(tex);
+        resolve(tex);
       },
       undefined,
       () => {
         textureCache[url] = 'failed';
+        reject();
       }
     );
-  }, [url]);
+  });
+}
+
+function useTexture(url, isSRGB = true) {
+  const [texture, setTexture] = useState(() =>
+    url && textureCache[url] && textureCache[url] !== 'failed' ? textureCache[url] : null
+  );
+
+  useEffect(() => {
+    if (!url) return;
+    let cancelled = false;
+    loadTexture(url, isSRGB).then((tex) => {
+      if (!cancelled) setTexture(tex);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [url, isSRGB]);
 
   return texture;
 }
@@ -65,6 +78,7 @@ function useTexture(url) {
 const Planet = React.memo(function Planet({ data }) {
   const groupRef = useRef();
   const meshRef = useRef();
+  const materialRef = useRef();
   const posRef = useRef(new THREE.Vector3());
 
   const isPaused = useStore((s) => s.isPaused);
@@ -76,11 +90,18 @@ const Planet = React.memo(function Planet({ data }) {
   const introDone = useStore((s) => s.introDone);
 
   const textureSet = PLANET_TEXTURES[data.id] || { map: data.textureUrl };
-  const colorMap = useTexture(textureSet.map || data.textureUrl);
-  const normalMap = useTexture(textureSet.normal);
-  const specularMap = useTexture(textureSet.specular);
+  const colorMap = useTexture(textureSet.map || data.textureUrl, true);
+  const normalMap = useTexture(textureSet.normal || null, false);
+  const specularMap = useTexture(textureSet.specular || null, false);
   const ringUrl = data.hasRings ? `${TEX}/2k_saturn_ring_alpha.png` : null;
-  const saturnRingMap = useTexture(ringUrl);
+  const saturnRingMap = useTexture(ringUrl, true);
+
+  // Force material update when textures load
+  useEffect(() => {
+    if (materialRef.current) {
+      materialRef.current.needsUpdate = true;
+    }
+  }, [colorMap, normalMap, specularMap]);
 
   const orbitalPeriod = data.realData.orbitalPeriod_days;
   const angleOffset = useMemo(() => Math.random() * Math.PI * 2, [data.id]);
@@ -123,14 +144,15 @@ const Planet = React.memo(function Planet({ data }) {
       <mesh ref={meshRef} onClick={handleClick}>
         <sphereGeometry args={[data.radius, segments, segments]} />
         <meshStandardMaterial
+          ref={materialRef}
           map={colorMap || null}
           normalMap={normalMap || null}
-          bumpMap={!normalMap ? colorMap || null : null}
+          bumpMap={!normalMap && colorMap ? colorMap : null}
           bumpScale={matProps.bumpScale || 0}
           roughnessMap={specularMap || null}
           color={colorMap ? '#ffffff' : data.color}
           emissive={matProps.emissive}
-          emissiveIntensity={matProps.emissiveIntensity}
+          emissiveIntensity={colorMap ? matProps.emissiveIntensity * 0.5 : matProps.emissiveIntensity}
           roughness={matProps.roughness}
           metalness={matProps.metalness}
         />
