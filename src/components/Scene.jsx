@@ -1,10 +1,7 @@
-import React, { useRef, Suspense, useEffect, useCallback, useMemo } from 'react';
-import { Canvas, useThree, useFrame, extend } from '@react-three/fiber';
+import React, { useRef, Suspense, useEffect, useCallback } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import * as THREE from 'three';
-import { EffectComposer as ThreeEffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import Sun from './Sun';
 import Planet from './Planet';
 import Orbit from './Orbit';
@@ -14,8 +11,6 @@ import Galaxies from './Galaxies';
 import useCamera from '../hooks/useCamera';
 import useStore from '../store/useStore';
 import { PLANETS } from '../data/planets';
-
-extend({ UnrealBloomPass });
 
 function CameraController() {
   const controlsRef = useRef();
@@ -44,39 +39,10 @@ function CameraController() {
   );
 }
 
-function UnrealBloomEffect() {
-  const { gl, scene, camera, size } = useThree();
-  const composerRef = useRef();
-
-  const bloomPass = useMemo(
-    () => new UnrealBloomPass(new THREE.Vector2(size.width, size.height), 1.5, 0.45, 0.85),
-    [size.width, size.height]
-  );
-
-  useEffect(() => {
-    const composer = new ThreeEffectComposer(gl);
-    composer.addPass(new RenderPass(scene, camera));
-    composer.addPass(bloomPass);
-    composerRef.current = composer;
-    return () => composer.dispose();
-  }, [gl, scene, camera, bloomPass]);
-
-  useEffect(() => {
-    bloomPass.setSize(size.width, size.height);
-    if (composerRef.current) composerRef.current.setSize(size.width, size.height);
-  }, [size, bloomPass]);
-
-  useFrame(() => {
-    if (composerRef.current) composerRef.current.render();
-  }, 1);
-
-  return null;
-}
-
 function SceneContent() {
   return (
     <>
-      <ambientLight intensity={0.05} color="#1a2238" />
+      <ambientLight intensity={0.25} color="#c8d4ff" />
 
       <StarField />
       <Galaxies />
@@ -91,7 +57,16 @@ function SceneContent() {
       ))}
 
       <AsteroidBelt />
-      <UnrealBloomEffect />
+
+      <EffectComposer>
+        <Bloom
+          luminanceThreshold={0.6}
+          luminanceSmoothing={0.8}
+          intensity={1.0}
+          mipmapBlur
+        />
+      </EffectComposer>
+
       <CameraController />
     </>
   );

@@ -22,15 +22,15 @@ const PLANET_TEXTURES = {
 };
 
 const PLANET_MATERIALS = {
-  mercury: { roughness: 1.0, metalness: 0.05, bumpScale: 0.05 },
-  venus: { roughness: 0.9, metalness: 0.0 },
-  earth: { roughness: 0.8, metalness: 0.05, bumpScale: 0.04 },
-  mars: { roughness: 0.95, metalness: 0.0, bumpScale: 0.05 },
-  jupiter: { roughness: 0.85, metalness: 0.0 },
-  saturn: { roughness: 0.9, metalness: 0.0 },
-  uranus: { roughness: 0.85, metalness: 0.0 },
-  neptune: { roughness: 0.85, metalness: 0.0 },
-  pluto: { roughness: 0.95, metalness: 0.0 },
+  mercury: { roughness: 0.95, metalness: 0.05, bumpScale: 0.05, emissive: '#1a1510', emissiveIntensity: 0.12 },
+  venus:   { roughness: 0.8,  metalness: 0.0,                   emissive: '#2a1a08', emissiveIntensity: 0.15 },
+  earth:   { roughness: 0.75, metalness: 0.05, bumpScale: 0.04, emissive: '#081525', emissiveIntensity: 0.12 },
+  mars:    { roughness: 0.9,  metalness: 0.0,  bumpScale: 0.05, emissive: '#200800', emissiveIntensity: 0.15 },
+  jupiter: { roughness: 0.8,  metalness: 0.0,                   emissive: '#150c04', emissiveIntensity: 0.12 },
+  saturn:  { roughness: 0.8,  metalness: 0.0,                   emissive: '#151005', emissiveIntensity: 0.12 },
+  uranus:  { roughness: 0.75, metalness: 0.0,                   emissive: '#051215', emissiveIntensity: 0.18 },
+  neptune: { roughness: 0.75, metalness: 0.0,                   emissive: '#040828', emissiveIntensity: 0.20 },
+  pluto:   { roughness: 0.95, metalness: 0.0,                   emissive: '#10100c', emissiveIntensity: 0.10 },
 };
 
 function useTexture(url) {
@@ -131,6 +131,8 @@ const Planet = React.memo(function Planet({ data }) {
           bumpScale={matProps.bumpScale || 0}
           roughnessMap={specularMap || null}
           color={colorMap ? '#ffffff' : data.color}
+          emissive={matProps.emissive}
+          emissiveIntensity={matProps.emissiveIntensity}
           roughness={matProps.roughness}
           metalness={matProps.metalness}
         />
