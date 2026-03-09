@@ -18,7 +18,6 @@ function useTexture(url) {
     }
 
     const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin('anonymous');
     loader.load(
       url,
       (tex) => {
