@@ -51,10 +51,12 @@ function Moon({ moon, isPaused, speedMultiplier }) {
   );
 }
 
-const Moons = React.memo(function Moons({ moons, parentRadius, isPaused, speedMultiplier }) {
+const Moons = React.memo(function Moons({ parentData }) {
+  const isPaused = useStore((s) => s.isPaused);
+  const speedMultiplier = useStore((s) => s.speedMultiplier);
   return (
     <group>
-      {moons.map((moon) => (
+      {parentData.moons.map((moon) => (
         <Moon key={moon.name} moon={moon} isPaused={isPaused} speedMultiplier={speedMultiplier} />
       ))}
     </group>
