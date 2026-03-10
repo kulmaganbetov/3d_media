@@ -4,6 +4,7 @@ import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import useStore from '../store/useStore';
 import Moons from './Moons';
+import EarthExtras from './EarthExtras';
 
 const textureCache = {};
 const J2000_MS = new Date('2000-01-01T12:00:00Z').getTime();
@@ -96,7 +97,6 @@ const Planet = React.memo(function Planet({ data }) {
   const ringUrl = data.hasRings ? `${TEX}/2k_saturn_ring_alpha.png` : null;
   const saturnRingMap = useTexture(ringUrl, true);
 
-  // Force material update when textures load
   useEffect(() => {
     if (materialRef.current) {
       materialRef.current.needsUpdate = true;
@@ -157,6 +157,8 @@ const Planet = React.memo(function Planet({ data }) {
           metalness={matProps.metalness}
         />
       </mesh>
+
+      {data.id === 'earth' && <EarthExtras earthRadius={data.radius} />}
 
       {data.id === 'earth' && (
         <mesh scale={1.04}>
