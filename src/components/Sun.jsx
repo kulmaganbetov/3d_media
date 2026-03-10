@@ -8,29 +8,31 @@ import useStore from '../store/useStore';
 const textureCache = {};
 
 function useTexture(url) {
-  const [texture, setTexture] = React.useState(null);
+  const [texture, setTexture] = React.useState(() =>
+    url && textureCache[url] && textureCache[url] !== 'failed' ? textureCache[url] : null
+  );
 
   React.useEffect(() => {
     if (!url) return;
+    let cancelled = false;
     if (textureCache[url]) {
       if (textureCache[url] !== 'failed') setTexture(textureCache[url]);
       return;
     }
-
     const loader = new THREE.TextureLoader();
     loader.load(
       url,
       (tex) => {
+        if (cancelled) return;
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = 8;
         textureCache[url] = tex;
         setTexture(tex);
       },
       undefined,
-      () => {
-        textureCache[url] = 'failed';
-      }
+      () => { textureCache[url] = 'failed'; }
     );
+    return () => { cancelled = true; };
   }, [url]);
 
   return texture;
@@ -39,9 +41,14 @@ function useTexture(url) {
 const Sun = React.memo(function Sun() {
   const meshRef = useRef();
   const glowRef = useRef();
+  const materialRef = useRef();
   const setSelectedPlanet = useStore((s) => s.setSelectedPlanet);
   const setCameraTarget = useStore((s) => s.setCameraTarget);
   const sunTexture = useTexture(SUN_DATA.textureUrl);
+
+  React.useEffect(() => {
+    if (materialRef.current) materialRef.current.needsUpdate = true;
+  }, [sunTexture]);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
@@ -62,7 +69,7 @@ const Sun = React.memo(function Sun() {
     <group>
       <mesh ref={meshRef} onClick={handleClick}>
         <sphereGeometry args={[SUN_DATA.radius, 128, 128]} />
-        <meshBasicMaterial map={sunTexture || null} color={sunTexture ? '#ffffff' : '#FDB813'} />
+        <meshBasicMaterial ref={materialRef} map={sunTexture || null} color={sunTexture ? '#ffffff' : '#FDB813'} />
       </mesh>
 
       <mesh ref={glowRef}>
