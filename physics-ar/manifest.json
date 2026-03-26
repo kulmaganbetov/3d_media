@@ -1,0 +1,23 @@
+{
+  "name": "PhysicsAR — Физика Зертханасы",
+  "short_name": "PhysicsAR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#00d4ff",
+  "background_color": "#060912",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23060912'/%3E%3Cg stroke='%2300d4ff' stroke-width='7' fill='none'%3E%3Ccircle cx='96' cy='96' r='14'/%3E%3Cellipse cx='96' cy='96' rx='70' ry='28'/%3E%3Cellipse cx='96' cy='96' rx='70' ry='28' transform='rotate(60 96 96)'/%3E%3Cellipse cx='96' cy='96' rx='70' ry='28' transform='rotate(120 96 96)'/%3E%3C/g%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%23060912'/%3E%3Cg stroke='%2300d4ff' stroke-width='16' fill='none'%3E%3Ccircle cx='256' cy='256' r='34'/%3E%3Cellipse cx='256' cy='256' rx='180' ry='72'/%3E%3Cellipse cx='256' cy='256' rx='180' ry='72' transform='rotate(60 256 256)'/%3E%3Cellipse cx='256' cy='256' rx='180' ry='72' transform='rotate(120 256 256)'/%3E%3C/g%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
