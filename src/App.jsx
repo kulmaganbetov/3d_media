@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import Scene from './components/Scene';
 import Loader from './ui/Loader';
 import PlanetPanel from './ui/PlanetPanel';
@@ -65,21 +65,10 @@ function KeyboardHint() {
 }
 
 export default function App() {
-  const location = useLocation();
   const setSelectedPlanet = useStore((s) => s.setSelectedPlanet);
   const setCameraTarget = useStore((s) => s.setCameraTarget);
   const togglePause = useStore((s) => s.togglePause);
   const isLoaded = useStore((s) => s.isLoaded);
-
-  // Lock body scroll only on the main 3D scene route
-  useEffect(() => {
-    if (location.pathname === '/') {
-      document.body.classList.add('scene-active');
-    } else {
-      document.body.classList.remove('scene-active');
-    }
-    return () => document.body.classList.remove('scene-active');
-  }, [location.pathname]);
 
   // Keyboard shortcuts
   useEffect(() => {

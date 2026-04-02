@@ -77,7 +77,7 @@ export default function DocumentariesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#000005] text-white overflow-y-auto">
+    <div className="fixed inset-0 bg-[#000005] text-white overflow-y-auto z-50">
       {/* Starry background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {stars.map((s, i) => (
