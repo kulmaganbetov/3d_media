@@ -1,6 +1,5 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import useStore from '../store/useStore';
 
@@ -43,7 +42,6 @@ function ISSModel({ earthRadius }) {
   const issOrbitRef = useRef();
   const setSelectedPlanet = useStore((s) => s.setSelectedPlanet);
   const setCameraTarget = useStore((s) => s.setCameraTarget);
-  const introDone = useStore((s) => s.introDone);
 
   // Materials
   const hullMat = useMemo(
@@ -105,7 +103,6 @@ function ISSModel({ earthRadius }) {
         ref={issGroupRef}
         position={[orbitR, 0.03, 0]}
         scale={[0.55, 0.55, 0.55]}
-        onClick={handleClick}
       >
         {/* === MAIN TRUSS (ITS — Integrated Truss Structure) === */}
         <mesh>
@@ -218,17 +215,11 @@ function ISSModel({ earthRadius }) {
           </mesh>
         </group>
 
-        {/* Label */}
-        {introDone && (
-          <Html position={[0, 0.35, 0]} center distanceFactor={40}>
-            <div
-              className="text-[9px] px-2 py-0.5 rounded-full bg-black/50 border border-cyan-500/20 text-cyan-300 pointer-events-none select-none whitespace-nowrap"
-              style={{ textShadow: '0 0 6px rgba(0,212,255,0.4)' }}
-            >
-              ХҒС (ISS)
-            </div>
-          </Html>
-        )}
+        {/* Invisible click-target covering the whole ISS */}
+        <mesh onClick={handleClick}>
+          <boxGeometry args={[1.8, 0.5, 0.9]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
       </group>
     </group>
   );
