@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PLANETS, LABELS } from '../data/planets';
 import { NEARBY_STARS } from '../components/Stars';
 import { GALAXY_DATA } from '../components/Galaxies';
+import { ISS_DATA } from '../components/EarthExtras';
 import useStore from '../store/useStore';
 
 // Collect all moons from planets
@@ -15,6 +16,7 @@ const ALL_SEARCHABLE = [
   ...ALL_MOONS,
   ...NEARBY_STARS,
   ...GALAXY_DATA,
+  ISS_DATA,
 ];
 
 export default function SearchBar() {
@@ -34,7 +36,10 @@ export default function SearchBar() {
 
   const selectPlanet = (item) => {
     setSelectedPlanet(item);
-    if (item.position) {
+    if (item.isISS) {
+      // ISS — fly to Earth
+      setCameraTarget({ position: { x: 24, y: 0, z: 0 }, radius: 0.76 });
+    } else if (item.position) {
       // Star or galaxy with explicit position array
       const [x, y, z] = item.position;
       setCameraTarget({ position: { x, y, z }, radius: (item.radius || 1) * 3 });

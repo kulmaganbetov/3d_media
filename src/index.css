@@ -11,8 +11,16 @@
 html, body, #root {
   width: 100%;
   height: 100%;
-  overflow: hidden;
   background: #000;
+}
+
+/* Lock scrolling only on the main 3D scene */
+body.scene-active {
+  overflow: hidden;
+}
+body.scene-active #root {
+  overflow: hidden;
+  height: 100%;
 }
 
 ::-webkit-scrollbar {
