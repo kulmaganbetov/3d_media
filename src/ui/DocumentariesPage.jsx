@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -61,29 +61,44 @@ function VideoCard({ video, index }) {
 }
 
 export default function DocumentariesPage() {
+  // Memoize star positions so they don't re-randomize on re-render
+  const stars = useMemo(
+    () =>
+      Array.from({ length: 80 }, () => ({
+        width: Math.random() * 2 + 1,
+        height: Math.random() * 2 + 1,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        opacity: Math.random() * 0.5 + 0.1,
+        duration: 2 + Math.random() * 4,
+        delay: Math.random() * 3,
+      })),
+    []
+  );
+
   return (
-    <div className="min-h-screen bg-[#000005] text-white">
+    <div className="min-h-screen bg-[#000005] text-white overflow-y-auto">
       {/* Starry background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 80 }).map((_, i) => (
+        {stars.map((s, i) => (
           <div
             key={i}
             className="absolute rounded-full bg-white"
             style={{
-              width: Math.random() * 2 + 1,
-              height: Math.random() * 2 + 1,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              opacity: Math.random() * 0.5 + 0.1,
-              animation: `twinkle ${2 + Math.random() * 4}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 3}s`,
+              width: s.width,
+              height: s.height,
+              left: s.left,
+              top: s.top,
+              opacity: s.opacity,
+              animation: `twinkle ${s.duration}s ease-in-out infinite`,
+              animationDelay: `${s.delay}s`,
             }}
           />
         ))}
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 glass border-b border-white/5">
+      {/* Header — sticky so it stays visible while scrolling */}
+      <header className="sticky top-0 z-20 glass border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
