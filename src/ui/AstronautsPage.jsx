@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageLayout, { Card, Badge, StatBox } from './PageLayout';
 
-const W = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
+const W = (file, width = 440) =>
+  `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${encodeURIComponent(file)}&width=${width}`;
 const ASTRONAUTS = [
   {
     name: 'Юрий Гагарин', nameEn: 'Yuri Gagarin', country: 'КСРО', year: 1961,
@@ -10,7 +11,7 @@ const ASTRONAUTS = [
     bio: 'Юрий Алексеевич Гагарин (1934-1968) — кеңестік ұшқыш-ғарышкер. 1961 жылы 12 сәуірде Восток-1 ғарыш кемесімен ғарышқа ұшып, Жерді 108 минутта айналып шықты. «Поехали!» деген оның сөзі тарихқа кірді.',
     stats: { flights: 1, duration: '1 сағ 48 мин', altitude: '327 км' },
     color: '#ef4444',
-    image: `${W}/d/da/Yuri_Gagarin_%281961%29_-_Restoration.jpg/440px-Yuri_Gagarin_%281961%29_-_Restoration.jpg`,
+    image: W('Yuri_Gagarin_(1961)_-_Restoration.jpg'),
   },
   {
     name: 'Нил Армстронг', nameEn: 'Neil Armstrong', country: 'АҚШ', year: 1969,
@@ -18,7 +19,7 @@ const ASTRONAUTS = [
     bio: 'Нил Олден Армстронг (1930-2012) — американдық ғарышкер. 1969 жылы 20 шілдеде Айға аяқ басып, «Бұл — бір адамға кішкентай қадам, бірақ адамзатқа — алып секіріс» деген атақты сөзін айтты.',
     stats: { flights: 2, duration: '8 тәулік 14 сағ', altitude: '384,400 км' },
     color: '#3b82f6',
-    image: `${W}/0/0d/Neil_Armstrong_pose.jpg/440px-Neil_Armstrong_pose.jpg`,
+    image: W('Neil_Armstrong_pose.jpg'),
   },
   {
     name: 'Валентина Терешкова', nameEn: 'Valentina Tereshkova', country: 'КСРО', year: 1963,
@@ -26,7 +27,7 @@ const ASTRONAUTS = [
     bio: 'Валентина Владимировна Терешкова (1937) — ғарышқа ұшқан алғашқы әйел. 1963 жылы 16-19 маусымда Восток-6 кемесімен 3 тәулікте Жерді 48 рет айналды. Позывной — «Чайка».',
     stats: { flights: 1, duration: '2 тәулік 22 сағ', altitude: '231 км' },
     color: '#ec4899',
-    image: `${W}/a/a8/RIAN_archive_612748_Valentina_Tereshkova.jpg/440px-RIAN_archive_612748_Valentina_Tereshkova.jpg`,
+    image: W('RIAN_archive_612748_Valentina_Tereshkova.jpg'),
   },
   {
     name: 'Тоқтар Аубакиров', nameEn: 'Toktar Aubakirov', country: 'Қазақстан', year: 1991,
@@ -35,7 +36,7 @@ const ASTRONAUTS = [
     stats: { flights: 1, duration: '7 тәулік 22 сағ', altitude: '350 км' },
     color: '#22c55e',
     featured: true,
-    image: `${W}/2/24/Toktar_Aubakirov_MIR.jpg/440px-Toktar_Aubakirov_MIR.jpg`,
+    image: W('Toktar_Aubakirov_MIR.jpg'),
   },
   {
     name: 'Алексей Леонов', nameEn: 'Alexei Leonov', country: 'КСРО', year: 1965,
@@ -43,7 +44,7 @@ const ASTRONAUTS = [
     bio: 'Алексей Архипович Леонов (1934-2019) — ашық ғарышқа шыққан алғашқы адам. 1965 жылы 18 наурызда 12 минут 9 секунд ашық ғарышта болды. Суретші-ғарышкер ретінде де танымал.',
     stats: { flights: 2, duration: '7 тәулік 0 сағ', altitude: '475 км' },
     color: '#f59e0b',
-    image: `${W}/e/e6/Alexei_Leonov_in_1974.jpg/440px-Alexei_Leonov_in_1974.jpg`,
+    image: W('Alexei_Leonov_in_1974.jpg'),
   },
   {
     name: 'Крис Хэдфилд', nameEn: 'Chris Hadfield', country: 'Канада', year: 1995,
@@ -51,7 +52,7 @@ const ASTRONAUTS = [
     bio: 'Крис Остин Хэдфилд (1959) — канадалық ғарышкер, ХҒС-тың командирі. Ғарышта Дэвид Боуидің «Space Oddity» әнін орындап, миллиондарды тәнті етті. Ғарыш туралы бірнеше бестселлер кітап жазды.',
     stats: { flights: 3, duration: '166 тәулік', altitude: '408 км' },
     color: '#8b5cf6',
-    image: `${W}/7/74/Chris_Hadfield_2011.jpg/440px-Chris_Hadfield_2011.jpg`,
+    image: W('Chris_Hadfield_2011.jpg'),
   },
   {
     name: 'Айдын Айымбетов', nameEn: 'Aidyn Aimbetov', country: 'Қазақстан', year: 2015,
@@ -60,7 +61,7 @@ const ASTRONAUTS = [
     stats: { flights: 1, duration: '9 тәулік 20 сағ', altitude: '408 км' },
     color: '#06b6d4',
     featured: true,
-    image: `${W}/e/ed/Aydyn_Aimbetov_2015.jpg/440px-Aydyn_Aimbetov_2015.jpg`,
+    image: W('Aydyn_Aimbetov_2015.jpg'),
   },
   {
     name: 'Базз Олдрин', nameEn: 'Buzz Aldrin', country: 'АҚШ', year: 1969,
@@ -68,7 +69,7 @@ const ASTRONAUTS = [
     bio: 'Базз Олдрин (1930) — Айға аяқ басқан екінші адам. Аполлон-11 миссиясында Ай модулінің ұшқышы болды. 93 жасында ғарышты танымалдандыруды жалғастыруда.',
     stats: { flights: 2, duration: '12 тәулік 1 сағ', altitude: '384,400 км' },
     color: '#64748b',
-    image: `${W}/d/d4/Buzz_Aldrin_%28Apollo_11%29.jpg/440px-Buzz_Aldrin_%28Apollo_11%29.jpg`,
+    image: W('Buzz_Aldrin_(Apollo_11).jpg'),
   },
 ];
 
