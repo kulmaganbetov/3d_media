@@ -26,7 +26,7 @@ const TELESCOPES = [
       '5 рет жөнделді (shuttle миссиялары)',
     ],
     color: '#a855f7',
-    image: W('HST-SM4.jpg', 600),
+    image: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/HST-SM4.jpeg',
   },
   {
     name: 'Джеймс Уэбб',
@@ -72,7 +72,7 @@ const TELESCOPES = [
       'K2 миссиясы — 2-ші өмір',
     ],
     color: '#06b6d4',
-    image: W('KeplerSpaceTelescope-20130103-717260main_702702.jpg', 600),
+    image: 'https://upload.wikimedia.org/wikipedia/commons/4/45/Kepler_Space_Telescope_spacecraft_model_2.png',
   },
   {
     name: 'Чандра',

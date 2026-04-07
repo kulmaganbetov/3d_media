@@ -36,7 +36,7 @@ const ASTRONAUTS = [
     stats: { flights: 1, duration: '7 тәулік 22 сағ', altitude: '350 км' },
     color: '#22c55e',
     featured: true,
-    image: W('Toktar_Aubakirov_MIR.jpg'),
+    image: 'https://www.astronaut.ru/as_rusia/kaz85/foto/aubakirov_s.jpg',
   },
   {
     name: 'Алексей Леонов', nameEn: 'Alexei Leonov', country: 'КСРО', year: 1965,
@@ -44,7 +44,7 @@ const ASTRONAUTS = [
     bio: 'Алексей Архипович Леонов (1934-2019) — ашық ғарышқа шыққан алғашқы адам. 1965 жылы 18 наурызда 12 минут 9 секунд ашық ғарышта болды. Суретші-ғарышкер ретінде де танымал.',
     stats: { flights: 2, duration: '7 тәулік 0 сағ', altitude: '475 км' },
     color: '#f59e0b',
-    image: W('Alexei_Leonov_in_1974.jpg'),
+    image: 'https://upload.wikimedia.org/wikipedia/commons/3/37/Alexei_Leonov_%28cropped_2%29.jpg',
   },
   {
     name: 'Крис Хэдфилд', nameEn: 'Chris Hadfield', country: 'Канада', year: 1995,
@@ -61,7 +61,7 @@ const ASTRONAUTS = [
     stats: { flights: 1, duration: '9 тәулік 20 сағ', altitude: '408 км' },
     color: '#06b6d4',
     featured: true,
-    image: W('Aydyn_Aimbetov_2015.jpg'),
+    image: 'https://upload.wikimedia.org/wikipedia/commons/3/30/Aidyn_Aimbetov.jpg',
   },
   {
     name: 'Базз Олдрин', nameEn: 'Buzz Aldrin', country: 'АҚШ', year: 1969,
