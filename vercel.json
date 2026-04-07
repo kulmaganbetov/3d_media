@@ -4,6 +4,6 @@
       "source": "/api/textures/:path*",
       "destination": "https://www.solarsystemscope.com/textures/download/:path*"
     },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
