@@ -79,7 +79,7 @@ const NEBULAE = [
     ],
     color: '#38bdf8',
     gradient: 'from-cyan-500 to-blue-600',
-    image: W('Ring_Nebula_(M57)_-_Hubble.jpg', 600),
+    image: 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Webb_captures_detailed_beauty_of_Ring_Nebula_%28NIRCam_image%29_%28weic2320b%29.jpg',
   },
   {
     name: 'Қарақұс тұмандығы',
