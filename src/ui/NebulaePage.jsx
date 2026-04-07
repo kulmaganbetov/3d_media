@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import PageLayout, { Card, Badge } from './PageLayout';
 
-const W = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
+const W = (file, width = 600) =>
+  `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${encodeURIComponent(file)}&width=${width}`;
 const NEBULAE = [
   {
     name: 'Орион тұмандығы',
@@ -21,7 +22,7 @@ const NEBULAE = [
     ],
     color: '#e879f9',
     gradient: 'from-purple-600 to-pink-500',
-    image: `${W}/f/f3/Orion_Nebula_-_Hubble_2006_mosaic_18000.jpg/600px-Orion_Nebula_-_Hubble_2006_mosaic_18000.jpg`,
+    image: W('Orion_Nebula_-_Hubble_2006_mosaic_18000.jpg', 600),
   },
   {
     name: 'Тіршілік бағаналары',
@@ -40,7 +41,7 @@ const NEBULAE = [
     ],
     color: '#a78bfa',
     gradient: 'from-indigo-600 to-purple-500',
-    image: `${W}/b/b2/Eagle_nebula_pillars.jpg/600px-Eagle_nebula_pillars.jpg`,
+    image: W('Eagle_nebula_pillars.jpg', 600),
   },
   {
     name: 'Шақырымдық тұмандық',
@@ -59,7 +60,7 @@ const NEBULAE = [
     ],
     color: '#f97316',
     gradient: 'from-orange-600 to-red-500',
-    image: `${W}/0/00/Crab_Nebula.jpg/600px-Crab_Nebula.jpg`,
+    image: W('Crab_Nebula.jpg', 600),
   },
   {
     name: 'Сақина тұмандығы',
@@ -78,7 +79,7 @@ const NEBULAE = [
     ],
     color: '#38bdf8',
     gradient: 'from-cyan-500 to-blue-600',
-    image: `${W}/1/12/Ring_Nebula_%28M57%29_-_Hubble.jpg/600px-Ring_Nebula_%28M57%29_-_Hubble.jpg`,
+    image: W('Ring_Nebula_(M57)_-_Hubble.jpg', 600),
   },
   {
     name: 'Қарақұс тұмандығы',
@@ -97,7 +98,7 @@ const NEBULAE = [
     ],
     color: '#34d399',
     gradient: 'from-emerald-500 to-teal-600',
-    image: `${W}/b/b2/Eagle_nebula_pillars.jpg/600px-Eagle_nebula_pillars.jpg`,
+    image: W('Eagle_nebula_pillars.jpg', 600),
   },
   {
     name: 'Ат басы тұмандығы',
@@ -116,7 +117,7 @@ const NEBULAE = [
     ],
     color: '#ef4444',
     gradient: 'from-red-700 to-rose-600',
-    image: `${W}/6/68/Barnard_33.jpg/600px-Barnard_33.jpg`,
+    image: W('Barnard_33.jpg', 600),
   },
   {
     name: 'Кошачий Глаз',
@@ -135,7 +136,7 @@ const NEBULAE = [
     ],
     color: '#14b8a6',
     gradient: 'from-teal-400 to-emerald-600',
-    image: `${W}/c/c8/Catseye-big.jpg/600px-Catseye-big.jpg`,
+    image: W('Catseye-big.jpg', 600),
   },
   {
     name: 'Кариналық тұмандық',
@@ -154,7 +155,7 @@ const NEBULAE = [
     ],
     color: '#f472b6',
     gradient: 'from-pink-500 to-rose-600',
-    image: `${W}/7/7a/Carina_Nebula_by_Harel_Boren_%28151851961%2C_modified%29.jpg/600px-Carina_Nebula_by_Harel_Boren_%28151851961%2C_modified%29.jpg`,
+    image: W('Carina_Nebula_by_Harel_Boren_(151851961,_modified).jpg', 600),
   },
 ];
 

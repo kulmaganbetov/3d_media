@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import PageLayout, { Card, Badge, StatBox } from './PageLayout';
 
-const W = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
+const W = (file, width = 600) =>
+  `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${encodeURIComponent(file)}&width=${width}`;
 const TELESCOPES = [
   {
     name: 'Хаббл',
@@ -25,7 +26,7 @@ const TELESCOPES = [
       '5 рет жөнделді (shuttle миссиялары)',
     ],
     color: '#a855f7',
-    image: `${W}/3/3f/HST-SM4.jpg/600px-HST-SM4.jpg`,
+    image: W('HST-SM4.jpg', 600),
   },
   {
     name: 'Джеймс Уэбб',
@@ -48,7 +49,7 @@ const TELESCOPES = [
       'Экзопланетада су буын тапты (WASP-96b)',
     ],
     color: '#f59e0b',
-    image: `${W}/e/e2/Webb%27s_First_Deep_Field.jpg/600px-Webb%27s_First_Deep_Field.jpg`,
+    image: W("Webb's_First_Deep_Field.jpg", 600),
   },
   {
     name: 'Кеплер',
@@ -71,7 +72,7 @@ const TELESCOPES = [
       'K2 миссиясы — 2-ші өмір',
     ],
     color: '#06b6d4',
-    image: `${W}/4/47/KeplerSpaceTelescope-20130103-717260main_702702.jpg/600px-KeplerSpaceTelescope-20130103-717260main_702702.jpg`,
+    image: W('KeplerSpaceTelescope-20130103-717260main_702702.jpg', 600),
   },
   {
     name: 'Чандра',
@@ -94,7 +95,7 @@ const TELESCOPES = [
       'Ең биік орбиталы телескоп',
     ],
     color: '#ef4444',
-    image: `${W}/2/2f/Chandra_X-ray_Observatory.jpg/600px-Chandra_X-ray_Observatory.jpg`,
+    image: W('Chandra_X-ray_Observatory.jpg', 600),
   },
   {
     name: 'Спитцер',
@@ -117,7 +118,7 @@ const TELESCOPES = [
       'Жұлдыз түзілу аймақтарын зерттеді',
     ],
     color: '#22c55e',
-    image: `${W}/5/52/Spitzer_space_telescope.jpg/600px-Spitzer_space_telescope.jpg`,
+    image: W('Spitzer_space_telescope.jpg', 600),
   },
   {
     name: 'TESS',
@@ -140,7 +141,7 @@ const TELESCOPES = [
       'TOI каталогы — мыңдаған кандидат',
     ],
     color: '#3b82f6',
-    image: `${W}/2/27/Transiting_Exoplanet_Survey_Satellite_artist_concept_%28transparent_background%29.png/600px-Transiting_Exoplanet_Survey_Satellite_artist_concept_%28transparent_background%29.png`,
+    image: W('Transiting_Exoplanet_Survey_Satellite_artist_concept_(transparent_background).png', 600),
   },
 ];
 
