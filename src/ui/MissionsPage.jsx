@@ -2,19 +2,20 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageLayout, { Card, Badge, StatBox } from './PageLayout';
 
+const W = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
 const MISSIONS = [
-  { year: 1957, name: 'Спутник-1', country: 'КСРО', type: 'Жер орбитасы', description: 'Алғашқы жасанды жер серігі. Ғарыш дәуірінің басталуы.', details: 'Массасы 83.6 кг. 21 тәулік жұмыс істеді. «Бип-бип» сигналы бүкіл әлемді таңғалдырды.' },
-  { year: 1961, name: 'Восток-1', country: 'КСРО', type: 'Адам ұшырылымы', description: 'Юрий Гагарин — ғарышқа ұшқан алғашқы адам.', details: '108 минутта Жерді айналып шықты. «Поехали!» сөзі тарихқа кірді.' },
-  { year: 1969, name: 'Аполлон-11', country: 'АҚШ', type: 'Айға қону', description: 'Нил Армстронг пен Базз Олдрин Айға аяқ басты.', details: '«Адамзат үшін алып қадам». 21 сағат 36 минут Ай бетінде болды.' },
-  { year: 1971, name: 'Марс-3', country: 'КСРО', type: 'Марс миссиясы', description: 'Марс бетіне алғашқы жұмсақ қону.', details: '14.5 секунд деректер жіберді. Алғашқы Марс суреті.' },
-  { year: 1977, name: 'Вояджер 1 & 2', country: 'АҚШ', type: 'Ғарыш зерттеуі', description: 'Күн жүйесінен шыққан алғашқы аппараттар.', details: 'Вояджер-1 — Жерден ең алыс адам жасаған нысан. 24 млрд км қашықтықта.' },
-  { year: 1990, name: 'Хаббл телескопы', country: 'АҚШ/ESA', type: 'Телескоп', description: 'Орбиталық телескоп ғарышты зерттеу тарихын өзгертті.', details: '1.5 млн+ сурет түсірді. Deep Field суреті ғаламның тереңдігін көрсетті.' },
-  { year: 1991, name: 'Аубакиров ұшуы', country: 'Қазақстан/КСРО', type: 'Адам ұшырылымы', description: 'Тоқтар Аубакиров — алғашқы қазақ ғарышкер.', details: 'Союз ТМ-13 кемесімен ұшты. Мир станциясында 7 тәулік 22 сағат болды.' },
-  { year: 1998, name: 'ХҒС құрылысы', country: 'Халықаралық', type: 'Ғарыш станциясы', description: 'Халықаралық ғарыш станциясының құрылысы басталды.', details: '16 ел қатысты. 2000 жылдан бері адамдар тұрақты тұрады.' },
-  { year: 2012, name: 'Curiosity', country: 'АҚШ', type: 'Марс миссиясы', description: 'Марс бетіндегі ең жетілдірілген ровер.', details: 'Марста бұрын сұйық су болғанын дәлелдеді. 2024 жылға дейін жұмыс істеді.' },
-  { year: 2021, name: 'Джеймс Уэбб', country: 'АҚШ/ESA/CSA', type: 'Телескоп', description: 'Ең қуатты ғарыш телескопы жіберілді.', details: 'Алғашқы жұлдыздар мен галактикаларды көре алады. L2 нүктесінде орналасқан.' },
-  { year: 2024, name: 'Artemis II', country: 'АҚШ', type: 'Ай миссиясы', description: 'Адамдарды қайта Айға жіберу бағдарламасы.', details: '50+ жылдан кейін адамдар қайта Айға барады.' },
-  { year: 2025, name: 'Starship Mars', country: 'SpaceX', type: 'Марс миссиясы', description: 'Марсқа адам жіберу жоспары.', details: 'Илон Маск адамзатты көппланеталық түр етуді мақсат етеді.' },
+  { year: 1957, name: 'Спутник-1', country: 'КСРО', type: 'Жер орбитасы', description: 'Алғашқы жасанды жер серігі. Ғарыш дәуірінің басталуы.', details: 'Массасы 83.6 кг. 21 тәулік жұмыс істеді. «Бип-бип» сигналы бүкіл әлемді таңғалдырды.', image: `${W}/b/be/Sputnik_asm.jpg/400px-Sputnik_asm.jpg` },
+  { year: 1961, name: 'Восток-1', country: 'КСРО', type: 'Адам ұшырылымы', description: 'Юрий Гагарин — ғарышқа ұшқан алғашқы адам.', details: '108 минутта Жерді айналып шықты. «Поехали!» сөзі тарихқа кірді.', image: `${W}/d/da/Yuri_Gagarin_%281961%29_-_Restoration.jpg/400px-Yuri_Gagarin_%281961%29_-_Restoration.jpg` },
+  { year: 1969, name: 'Аполлон-11', country: 'АҚШ', type: 'Айға қону', description: 'Нил Армстронг пен Базз Олдрин Айға аяқ басты.', details: '«Адамзат үшін алып қадам». 21 сағат 36 минут Ай бетінде болды.', image: `${W}/9/98/Aldrin_Apollo_11_original.jpg/400px-Aldrin_Apollo_11_original.jpg` },
+  { year: 1971, name: 'Марс-3', country: 'КСРО', type: 'Марс миссиясы', description: 'Марс бетіне алғашқы жұмсақ қону.', details: '14.5 секунд деректер жіберді. Алғашқы Марс суреті.', image: `${W}/a/a3/Mars_3_lander_vsm.jpg/400px-Mars_3_lander_vsm.jpg` },
+  { year: 1977, name: 'Вояджер 1 & 2', country: 'АҚШ', type: 'Ғарыш зерттеуі', description: 'Күн жүйесінен шыққан алғашқы аппараттар.', details: 'Вояджер-1 — Жерден ең алыс адам жасаған нысан. 24 млрд км қашықтықта.', image: `${W}/6/60/Voyager_spacecraft_model.png/400px-Voyager_spacecraft_model.png` },
+  { year: 1990, name: 'Хаббл телескопы', country: 'АҚШ/ESA', type: 'Телескоп', description: 'Орбиталық телескоп ғарышты зерттеу тарихын өзгертті.', details: '1.5 млн+ сурет түсірді. Deep Field суреті ғаламның тереңдігін көрсетті.', image: `${W}/3/3f/HST-SM4.jpg/400px-HST-SM4.jpg` },
+  { year: 1991, name: 'Аубакиров ұшуы', country: 'Қазақстан/КСРО', type: 'Адам ұшырылымы', description: 'Тоқтар Аубакиров — алғашқы қазақ ғарышкер.', details: 'Союз ТМ-13 кемесімен ұшты. Мир станциясында 7 тәулік 22 сағат болды.', image: `${W}/2/24/Toktar_Aubakirov_MIR.jpg/400px-Toktar_Aubakirov_MIR.jpg` },
+  { year: 1998, name: 'ХҒС құрылысы', country: 'Халықаралық', type: 'Ғарыш станциясы', description: 'Халықаралық ғарыш станциясының құрылысы басталды.', details: '16 ел қатысты. 2000 жылдан бері адамдар тұрақты тұрады.', image: `${W}/0/04/International_Space_Station_after_undocking_of_STS-132.jpg/400px-International_Space_Station_after_undocking_of_STS-132.jpg` },
+  { year: 2012, name: 'Curiosity', country: 'АҚШ', type: 'Марс миссиясы', description: 'Марс бетіндегі ең жетілдірілген ровер.', details: 'Марста бұрын сұйық су болғанын дәлелдеді. 2024 жылға дейін жұмыс істеді.', image: `${W}/f/f3/Curiosity_Self-Portrait_at_%27Big_Sky%27_Drilling_Site.jpg/400px-Curiosity_Self-Portrait_at_%27Big_Sky%27_Drilling_Site.jpg` },
+  { year: 2021, name: 'Джеймс Уэбб', country: 'АҚШ/ESA/CSA', type: 'Телескоп', description: 'Ең қуатты ғарыш телескопы жіберілді.', details: 'Алғашқы жұлдыздар мен галактикаларды көре алады. L2 нүктесінде орналасқан.', image: `${W}/e/e2/Webb%27s_First_Deep_Field.jpg/400px-Webb%27s_First_Deep_Field.jpg` },
+  { year: 2024, name: 'Artemis II', country: 'АҚШ', type: 'Ай миссиясы', description: 'Адамдарды қайта Айға жіберу бағдарламасы.', details: '50+ жылдан кейін адамдар қайта Айға барады.', image: `${W}/7/7c/Orion_with_service_module.jpg/400px-Orion_with_service_module.jpg` },
+  { year: 2025, name: 'Starship Mars', country: 'SpaceX', type: 'Марс миссиясы', description: 'Марсқа адам жіберу жоспары.', details: 'Илон Маск адамзатты көппланеталық түр етуді мақсат етеді.', image: `${W}/1/16/Starship_stacked_2025_%28cropped%29.jpg/400px-Starship_stacked_2025_%28cropped%29.jpg` },
 ];
 
 const TYPE_COLORS = {
@@ -128,6 +129,19 @@ export default function MissionsPage() {
                       onClick={() => setExpandedIndex(isExpanded ? null : index)}
                       className="group"
                     >
+                      {/* Mission image */}
+                      {mission.image && (
+                        <div className="relative h-36 -mx-4 -mt-4 mb-4 overflow-hidden rounded-t-xl bg-black/30">
+                          <img
+                            src={mission.image}
+                            alt={mission.name}
+                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                            onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-transparent to-transparent" />
+                        </div>
+                      )}
+
                       {/* Year */}
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 font-mono">

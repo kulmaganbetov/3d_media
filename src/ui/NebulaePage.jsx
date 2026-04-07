@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import PageLayout, { Card, Badge } from './PageLayout';
 
+const W = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
 const NEBULAE = [
   {
     name: 'Орион тұмандығы',
@@ -20,6 +21,7 @@ const NEBULAE = [
     ],
     color: '#e879f9',
     gradient: 'from-purple-600 to-pink-500',
+    image: `${W}/f/f3/Orion_Nebula_-_Hubble_2006_mosaic_18000.jpg/600px-Orion_Nebula_-_Hubble_2006_mosaic_18000.jpg`,
   },
   {
     name: 'Тіршілік бағаналары',
@@ -38,6 +40,7 @@ const NEBULAE = [
     ],
     color: '#a78bfa',
     gradient: 'from-indigo-600 to-purple-500',
+    image: `${W}/b/b2/Eagle_nebula_pillars.jpg/600px-Eagle_nebula_pillars.jpg`,
   },
   {
     name: 'Шақырымдық тұмандық',
@@ -56,6 +59,7 @@ const NEBULAE = [
     ],
     color: '#f97316',
     gradient: 'from-orange-600 to-red-500',
+    image: `${W}/0/00/Crab_Nebula.jpg/600px-Crab_Nebula.jpg`,
   },
   {
     name: 'Сақина тұмандығы',
@@ -74,6 +78,7 @@ const NEBULAE = [
     ],
     color: '#38bdf8',
     gradient: 'from-cyan-500 to-blue-600',
+    image: `${W}/1/12/Ring_Nebula_%28M57%29_-_Hubble.jpg/600px-Ring_Nebula_%28M57%29_-_Hubble.jpg`,
   },
   {
     name: 'Қарақұс тұмандығы',
@@ -92,6 +97,7 @@ const NEBULAE = [
     ],
     color: '#34d399',
     gradient: 'from-emerald-500 to-teal-600',
+    image: `${W}/b/b2/Eagle_nebula_pillars.jpg/600px-Eagle_nebula_pillars.jpg`,
   },
   {
     name: 'Ат басы тұмандығы',
@@ -110,6 +116,7 @@ const NEBULAE = [
     ],
     color: '#ef4444',
     gradient: 'from-red-700 to-rose-600',
+    image: `${W}/6/68/Barnard_33.jpg/600px-Barnard_33.jpg`,
   },
   {
     name: 'Кошачий Глаз',
@@ -128,6 +135,7 @@ const NEBULAE = [
     ],
     color: '#14b8a6',
     gradient: 'from-teal-400 to-emerald-600',
+    image: `${W}/c/c8/Catseye-big.jpg/600px-Catseye-big.jpg`,
   },
   {
     name: 'Кариналық тұмандық',
@@ -146,6 +154,7 @@ const NEBULAE = [
     ],
     color: '#f472b6',
     gradient: 'from-pink-500 to-rose-600',
+    image: `${W}/7/7a/Carina_Nebula_by_Harel_Boren_%28151851961%2C_modified%29.jpg/600px-Carina_Nebula_by_Harel_Boren_%28151851961%2C_modified%29.jpg`,
   },
 ];
 
@@ -233,10 +242,26 @@ export default function NebulaePage() {
               }
             `}</style>
 
-            {/* Gradient strip at top */}
-            <div
-              className={`h-1.5 w-full bg-gradient-to-r ${nebula.gradient}`}
-            />
+            {/* Nebula image */}
+            {nebula.image && (
+              <div className="relative h-48 overflow-hidden bg-black/30">
+                <img
+                  src={nebula.image}
+                  alt={nebula.name}
+                  className="w-full h-full object-cover opacity-90 hover:opacity-100 hover:scale-105 transition-all duration-500"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#000005] via-transparent to-transparent" />
+                <div
+                  className={`absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r ${nebula.gradient}`}
+                />
+              </div>
+            )}
+            {!nebula.image && (
+              <div
+                className={`h-1.5 w-full bg-gradient-to-r ${nebula.gradient}`}
+              />
+            )}
 
             <div className="p-5 sm:p-6">
               {/* Header */}

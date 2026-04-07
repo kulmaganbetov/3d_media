@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import PageLayout, { Card, Badge, StatBox } from './PageLayout';
 
+const W = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
 const TELESCOPES = [
   {
     name: 'Хаббл',
@@ -24,6 +25,7 @@ const TELESCOPES = [
       '5 рет жөнделді (shuttle миссиялары)',
     ],
     color: '#a855f7',
+    image: `${W}/3/3f/HST-SM4.jpg/600px-HST-SM4.jpg`,
   },
   {
     name: 'Джеймс Уэбб',
@@ -46,6 +48,7 @@ const TELESCOPES = [
       'Экзопланетада су буын тапты (WASP-96b)',
     ],
     color: '#f59e0b',
+    image: `${W}/e/e2/Webb%27s_First_Deep_Field.jpg/600px-Webb%27s_First_Deep_Field.jpg`,
   },
   {
     name: 'Кеплер',
@@ -68,6 +71,7 @@ const TELESCOPES = [
       'K2 миссиясы — 2-ші өмір',
     ],
     color: '#06b6d4',
+    image: `${W}/4/47/KeplerSpaceTelescope-20130103-717260main_702702.jpg/600px-KeplerSpaceTelescope-20130103-717260main_702702.jpg`,
   },
   {
     name: 'Чандра',
@@ -90,6 +94,7 @@ const TELESCOPES = [
       'Ең биік орбиталы телескоп',
     ],
     color: '#ef4444',
+    image: `${W}/2/2f/Chandra_X-ray_Observatory.jpg/600px-Chandra_X-ray_Observatory.jpg`,
   },
   {
     name: 'Спитцер',
@@ -112,6 +117,7 @@ const TELESCOPES = [
       'Жұлдыз түзілу аймақтарын зерттеді',
     ],
     color: '#22c55e',
+    image: `${W}/5/52/Spitzer_space_telescope.jpg/600px-Spitzer_space_telescope.jpg`,
   },
   {
     name: 'TESS',
@@ -134,6 +140,7 @@ const TELESCOPES = [
       'TOI каталогы — мыңдаған кандидат',
     ],
     color: '#3b82f6',
+    image: `${W}/2/27/Transiting_Exoplanet_Survey_Satellite_artist_concept_%28transparent_background%29.png/600px-Transiting_Exoplanet_Survey_Satellite_artist_concept_%28transparent_background%29.png`,
   },
 ];
 
@@ -213,7 +220,22 @@ export default function TelescopesPage() {
                 }}
               />
 
-              <div className="relative rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 group-hover:border-purple-500/30 transition-all duration-300 p-5 sm:p-6">
+              <div className="relative rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 group-hover:border-purple-500/30 transition-all duration-300">
+                {/* Telescope image */}
+                {telescope.image && (
+                  <div className="relative h-48 overflow-hidden bg-black/30">
+                    <img
+                      src={telescope.image}
+                      alt={telescope.name}
+                      className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#000005] via-transparent to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: telescope.color }} />
+                  </div>
+                )}
+
+                <div className="p-5 sm:p-6">
                 {/* Top: status badge + name */}
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
                   <div>
@@ -293,6 +315,7 @@ export default function TelescopesPage() {
                       }}
                     />
                   </div>
+                </div>
                 </div>
               </div>
             </motion.div>
