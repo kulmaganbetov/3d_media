@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#00d4ff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PhysicsAR" />
+  <meta name="description" content="PhysicsAR — Физика Зертханасы: қазақ мектеп оқушыларына арналған PWA" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%23060912'/%3E%3Cg stroke='%2300d4ff' stroke-width='16' fill='none'%3E%3Ccircle cx='256' cy='256' r='34'/%3E%3Cellipse cx='256' cy='256' rx='180' ry='72'/%3E%3Cellipse cx='256' cy='256' rx='180' ry='72' transform='rotate(60 256 256)'/%3E%3Cellipse cx='256' cy='256' rx='180' ry='72' transform='rotate(120 256 256)'/%3E%3C/g%3E%3C/svg%3E" />
+  <title>PhysicsAR — Физика Зертханасы</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#060912; --card:#0d1526; --accent:#00d4ff; --success:#00ff9d; --warn:#ff6b35; --text:#e8f0fe; --sub:#8ba3c7; }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans',sans-serif;overflow-x:hidden}
+    h1,h2,h3{font-family:'Rajdhani',sans-serif;letter-spacing:.4px}
+    .app{min-height:100vh;padding:16px 16px 84px}
+    .page{animation:fadeSlide .35s ease}
+    @keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .card{background:var(--card);border:1px solid #1e325d;border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 8px 20px #0005;transition:.2s transform,.2s box-shadow}
+    .card:hover{transform:translateY(-3px);box-shadow:0 0 16px #00d4ff55}
+    .btn{min-height:44px;padding:10px 14px;background:linear-gradient(120deg,#0099cc,#00d4ff);border:none;border-radius:12px;color:#00141c;font-weight:700;cursor:pointer}
+    .btn:disabled{opacity:.6}
+    .btn.secondary{background:#1d2d4d;color:var(--text)}
+    .btn.warn{background:var(--warn);color:#220}
+    input,select,textarea{width:100%;min-height:44px;border-radius:10px;border:1px solid #29437a;background:#091225;color:var(--text);padding:10px}
+    .muted{color:var(--sub);font-size:.92rem}.grid{display:grid;gap:10px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .bottom-nav{position:fixed;left:0;right:0;bottom:0;background:#060b16f2;border-top:1px solid #1a2f58;display:grid;grid-template-columns:repeat(5,1fr);z-index:20}
+    .bottom-nav button{min-height:52px;background:none;border:none;color:var(--sub);font-weight:700}.bottom-nav button.active{color:var(--accent)}
+    canvas.sim{width:100%;height:240px;background:#050a14;border:1px solid #1e325d;border-radius:12px;display:block}
+    .formula{color:var(--success);font-family:ui-monospace,Consolas,monospace;font-size:.95rem}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .chat{height:50vh;overflow:auto;padding:8px;background:#070f1d;border-radius:12px;border:1px solid #1e325d}
+    .bubble{padding:10px;border-radius:12px;margin:8px 0;max-width:92%}.u{background:#1f335f;margin-left:auto}.a{background:#12213f}
+    .progress{height:12px;background:#102038;border-radius:999px;overflow:hidden}.progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--success))}
+    #arWrap{position:relative;min-height:65vh;background:#000;border-radius:12px;overflow:hidden}
+    #arVideo,#arCanvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  </style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<nav class="bottom-nav" id="nav"></nav>
+<script>
+const state={token:localStorage.getItem('token')||'',user:JSON.parse(localStorage.getItem('user')||'null'),chat:[],arTab:1,media:null,anim:null};
+const app=document.getElementById('app'), nav=document.getElementById('nav');
+const routes=['login','register','home','lessons','labs','practice','ar','ai','results'];
+const navItems=[['home','Басты'],['lessons','Сабақ'],['labs','Зертхана'],['ar','AR'],['ai','AI']];
+const lessons=[
+{t:'Механика: Маятник теориясы',f:'T = 2π√(L/g)',txt:'Маятниктің периоды жіп ұзындығына тәуелді, массаға тәуелді емес. Тербеліс кезінде энергия алмасады.',svg:`<svg viewBox='0 0 220 140'><line x1='110' y1='10' x2='60' y2='90' stroke='#00d4ff' stroke-width='3'/><circle cx='60' cy='95' r='12' fill='#00ff9d'/><line x1='30' y1='10' x2='190' y2='10' stroke='#8ba3c7' /></svg>`},
+{t:'Электр: Омның заңы',f:'U = I·R, I = U/R, R = U/I',txt:'Кернеу, ток және кедергі арасындағы байланыс. Кернеу артса, ток өседі, кедергі артса, ток азаяды.',svg:`<svg viewBox='0 0 220 140'><rect x='20' y='55' width='30' height='30' stroke='#00d4ff' fill='none'/><line x1='50' y1='70' x2='110' y2='70' stroke='#00d4ff' stroke-width='3'/><rect x='110' y='60' width='55' height='20' fill='#ff6b35'/></svg>`},
+{t:'Оптика: Жарық шағылысуы',f:'θi = θr',txt:'Түсу бұрышы шағылу бұрышына тең. Нормаль айнаға перпендикуляр жүргізіледі.',svg:`<svg viewBox='0 0 220 140'><line x1='20' y1='100' x2='200' y2='100' stroke='#8ba3c7' stroke-width='4'/><line x1='110' y1='30' x2='110' y2='120' stroke='#00d4ff' stroke-dasharray='5 4'/><line x1='40' y1='40' x2='110' y2='100' stroke='#00ff9d' stroke-width='3'/><line x1='110' y1='100' x2='180' y2='40' stroke='#00d4ff' stroke-width='3'/></svg>`},
+{t:'Кинематика: Еркін құлау',f:'h = 1/2gt², v = gt, g = 9.8 m/s²',txt:'Еркін құлауда дене бірқалыпты үдемелі қозғалады. Үдеу тұрақты және g-ге тең.',svg:`<svg viewBox='0 0 220 140'><line x1='35' y1='15' x2='35' y2='120' stroke='#8ba3c7'/><circle cx='120' cy='30' r='12' fill='#00d4ff'/><line x1='120' y1='45' x2='120' y2='105' stroke='#00ff9d' stroke-width='3' marker-end='url(#a)'/><defs><marker id='a' markerWidth='6' markerHeight='6' refX='3' refY='3' orient='auto'><path d='M0,0 L6,3 L0,6 Z' fill='#00ff9d'/></marker></defs></svg>`}
+];
+const practices={1:[['L=1м, g=9.8. T≈?',['1 c','2 c','3 c'],1],['L=4м, g=9.8. T≈?',['2 c','4 c','6 c'],1],['T қандай шама?',['Ток','Период','Кернеу'],1],['g шамасы?',['9.8','98','0.98'],0],['L өссе T ...',['Өседі','Төмендейді','Өзгермейді'],0]],2:[['U=12В, R=6Ω. I=?',['2A','6A','72A'],0],['R=10Ω, I=0.5A. U=?',['5В','20В','0.05В'],0],['Ом заңы',['U=IR','F=ma','p=mv'],0],['R өссе I ...',['Өседі','Азаяды','Тұрақты'],1],['I өлшемі',['Ом','Вольт','Ампер'],2]],3:[['Айнада θi=30°, θr=?',['15°','30°','60°'],1],['Нормаль ...',['Параллель','Перпендикуляр','Қиғаш'],1],['Шағылу заңы',['θi=θr','θi>θr','θi<θr'],0],['Түсу бұрышы неден өлшенеді?',['Нормальдан','Айнадан','Кездейсоқ'],0],['Тегіс айна',['Диффуз','Спекуляр','Сыну'],1]],4:[['t=2с, v=?',['4.9','9.8','19.6'],2],['t=3с, h≈?',['44.1м','14.7м','88.2м'],0],['g ...',['9.8м/с²','9.8м/с','98м/с²'],0],['Еркін құлау',['Үдемелі','Баяулайтын','Тыныш'],0],['v=gt формуласында t өссе v ...',['Өседі','Азаяды','Тұрақты'],0]]};
+const guard=(r)=>!['login','register'].includes(r)&&!state.token;
+function setHash(h){location.hash='#'+h}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function get(k,d){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch{return d}}
+async function sha256(t){const b=new TextEncoder().encode(t);const h=await crypto.subtle.digest('SHA-256',b);return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function header(){return `<h1>PhysicsAR — Физика Зертханасы</h1><p class='muted'>Интерактивті оқу платформасы</p>`}
+function navRender(route){if(['login','register'].includes(route)){nav.innerHTML='';return;} nav.innerHTML=navItems.map(([h,l])=>`<button class='${route===h?'active':''}' onclick="setHash('${h}')">${l}</button>`).join('')}
+function render(){let route=(location.hash||'#login').slice(1);if(!routes.includes(route))route='home'; if(guard(route)){route='login';setHash('login');}
+navRender(route);
+if(route==='login')return loginPage(); if(route==='register')return registerPage(); if(route==='home')return homePage(); if(route==='lessons')return lessonsPage(); if(route==='labs')return labsPage(); if(route==='practice')return practicePage(); if(route==='ar')return arPage(); if(route==='ai')return aiPage(); if(route==='results')return resultsPage();}
+function loginPage(){app.innerHTML=`<section class='page'>${header()}<div class='card'><h2>Кіру</h2><input id='lemail' type='email' placeholder='Email'><input id='lpass' type='password' placeholder='Құпия сөз'><button class='btn' onclick='login()'>Кіру</button><p class='muted'>Аккаунт жоқ па? <a href='#register'>Тіркелу</a></p></div></section>`}
+function registerPage(){app.innerHTML=`<section class='page'>${header()}<div class='card'><h2>Тіркелу</h2><input id='rname' placeholder='Аты-жөніңіз'><input id='remail' type='email' placeholder='Email'><input id='rpass' type='password' placeholder='Құпия сөз'><button class='btn' onclick='register()'>Тіркелу</button><p class='muted'>Аккаунт бар ма? <a href='#login'>Кіру</a></p></div></section>`}
+async function register(){const name=rname.value.trim(),email=remail.value.trim(),password=rpass.value; if(!name||!email||password.length<6)return alert('Барлық өрісті толтырыңыз (кемі 6 таңба).');
+const passwordHash=await sha256(password); const res=await fetch('./api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register',name,email,passwordHash})}); const j=await res.json(); if(!j.success)return alert(j.error||'Қате'); alert('Тіркелу сәтті!'); setHash('login');}
+async function login(){const email=lemail.value.trim(),password=lpass.value; const passwordHash=await sha256(password); const res=await fetch('./api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',email,passwordHash})}); const j=await res.json(); if(!res.ok)return alert(j.error||'Кіру қатесі'); state.token=j.token; state.user=j.user; localStorage.setItem('token',j.token); localStorage.setItem('user',JSON.stringify(j.user)); setHash('home');}
+function logout(){localStorage.removeItem('token');localStorage.removeItem('user');state.token='';state.user=null; stopAR(); setHash('login')}
+function homePage(){app.innerHTML=`<section class='page'>${header()}<div class='card'><h2>Қош келдіңіз, ${state.user?.name||state.user?.email||'оқушы'}!</h2><div class='grid two'>${[['lessons','Сабақтар'],['labs','Зертханалар'],['practice','Практика'],['ar','AR Режим']].map(x=>`<button class='btn secondary' onclick="setHash('${x[0]}')">${x[1]}</button>`).join('')}</div><div class='row' style='margin-top:10px'><button class='btn' onclick="setHash('results')">Нәтижелерім</button><button class='btn warn' onclick='logout()'>Шығу</button></div></div></section>`}
+function lessonsPage(){app.innerHTML=`<section class='page'>${header()}<h2>Сабақтар</h2>${lessons.map((l,i)=>`<div class='card'><h3>${i+1}. ${l.t}</h3><p>${l.txt}</p><p class='formula'>Формула: ${l.f}</p>${l.svg}</div>`).join('')}</section>`}
+function labTemplate(i,title,goal,equip,steps,controls){return `<div class='card'><h3>${i}. ${title}</h3><p><b>Мақсат:</b> ${goal}</p><p><b>Құралдар:</b> ${equip}</p><ol>${steps.map(s=>`<li>${s}</li>`).join('')}</ol><canvas id='lab${i}' class='sim' width='640' height='360'></canvas>${controls}<div class='row'><input id='labres${i}' placeholder='Нәтиже/қорытынды'><button class='btn' onclick='saveLab(${i})'>Сақтау</button></div><p class='muted' id='labstat${i}'></p></div>`}
+function labsPage(){app.innerHTML=`<section class='page'>${header()}<h2>Зертханалық жұмыстар</h2>
+${labTemplate(1,'Маятник симуляциясы','Периодтың L және g-ге тәуелділігін зерттеу.','Жіп, жүк, секундомер.',['L мен g орнатыңыз.','Тербелісті бақылаңыз.','T формуласын салыстырыңыз.'],`<div class='row'><label>L: <input id='pL' type='range' min='0.2' max='3' step='0.1' value='1'></label><label>g: <input id='pg' type='range' min='1' max='20' step='0.1' value='9.8'></label><span id='pInfo' class='formula'></span></div>`) }
+${labTemplate(2,'Омның заңы симуляциясы','U, R, I байланысын тексеру.','Қуат көзі, резистор, амперметр, вольтметр.',['U және R беріңіз.','I мәнін бақылаңыз.','Графиктік қорытынды жасаңыз.'],`<div class='row'><label>U: <input id='oU' type='range' min='1' max='12' step='1' value='6'></label><label>R: <input id='oR' type='range' min='1' max='100' step='1' value='10'></label><span id='oInfo' class='formula'></span></div>`) }
+${labTemplate(3,'Жарық шағылысуы симуляциясы','θi = θr заңын тексеру.','Лазер, айна, транспортир.',['Түсу бұрышын орнатыңыз.','Нормаль сызығын бақылаңыз.','Шағылу бұрышымен салыстырыңыз.'],`<div class='row'><label>θi: <input id='rA' type='range' min='0' max='89' step='1' value='35'></label><span id='rInfo' class='formula'></span></div>`) }
+${labTemplate(4,'Еркін құлау симуляциясы','h(t), v(t) тәуелділіктерін бақылау.','Биіктік шкаласы, таймер.',['Бастапқы h орнатыңыз.','Құлау процесін бақылаңыз.','v және t талдаңыз.'],`<div class='row'><label>h₀: <input id='fH' type='range' min='1' max='100' step='1' value='40'></label><button class='btn secondary' onclick='resetFall()'>Қайта бастау</button><span id='fInfo' class='formula'></span></div>`) }
+</section>`; startLabAnims()}
+function saveLab(i){const txt=document.getElementById('labres'+i).value.trim(); if(!txt) return alert('Нәтиже енгізіңіз'); const labs=get('labsResults',{}); labs[i]={text:txt,at:new Date().toISOString()}; save('labsResults',labs); document.getElementById('labstat'+i).textContent='Сақталды ✅';}
+let fallStart=performance.now(); function resetFall(){fallStart=performance.now()}
+function startLabAnims(){cancelAnimationFrame(state.anim); const c1=lab1.getContext('2d'),c2=lab2.getContext('2d'),c3=lab3.getContext('2d'),c4=lab4.getContext('2d');
+(function loop(t){
+const L=+pL.value,g=+pg.value,ang=Math.sin(t/700)*0.6,T=(2*Math.PI*Math.sqrt(L/g)).toFixed(2); pInfo.textContent=`T=${T} c`; c1.clearRect(0,0,640,360); c1.fillStyle='#050a14';c1.fillRect(0,0,640,360); c1.strokeStyle='#8ba3c7';c1.beginPath();c1.moveTo(320,30);c1.lineTo(320+Math.sin(ang)*130,40+Math.cos(ang)*130);c1.stroke(); c1.fillStyle='#00ff9d';c1.beginPath();c1.arc(320+Math.sin(ang)*130,40+Math.cos(ang)*130,16,0,7);c1.fill();
+const U=+oU.value,R=+oR.value,I=(U/R),gl=Math.min(255,50+I*180); oInfo.textContent=`I=${I.toFixed(2)} A`; c2.clearRect(0,0,640,360); c2.strokeStyle=`rgb(${gl},${gl},255)`; c2.lineWidth=4; c2.strokeRect(120,110,400,140); c2.fillStyle='#ff6b35'; c2.fillRect(190,150,70,50); c2.fillStyle='#00d4ff'; c2.fillRect(360,150,100,50);
+const a=+rA.value; rInfo.textContent=`θi=${a}°, θr=${a}°`; c3.clearRect(0,0,640,360); c3.strokeStyle='#8ba3c7'; c3.lineWidth=5; c3.beginPath(); c3.moveTo(60,250); c3.lineTo(580,250); c3.stroke(); c3.setLineDash([7,6]); c3.strokeStyle='#00d4ff'; c3.beginPath(); c3.moveTo(320,40); c3.lineTo(320,320); c3.stroke(); c3.setLineDash([]); const rad=a*Math.PI/180; const len=180; c3.strokeStyle='#00ff9d'; c3.beginPath(); c3.moveTo(320,250); c3.lineTo(320-Math.sin(rad)*len,250-Math.cos(rad)*len); c3.stroke(); c3.strokeStyle='#00d4ff'; c3.beginPath(); c3.moveTo(320,250); c3.lineTo(320+Math.sin(rad)*len,250-Math.cos(rad)*len); c3.stroke();
+const h0=+fH.value,tt=(t-fallStart)/1000,gf=9.8,v=gf*tt,h=Math.max(0,h0-0.5*gf*tt*tt); fInfo.textContent=`t=${tt.toFixed(2)} c, v=${v.toFixed(2)} м/с, h=${h.toFixed(2)} м`; c4.clearRect(0,0,640,360); c4.strokeStyle='#8ba3c7'; c4.beginPath(); c4.moveTo(70,30); c4.lineTo(70,320); c4.stroke(); for(let i=0;i<=10;i++){c4.fillStyle='#8ba3c7';c4.fillText((h0*(1-i/10)).toFixed(0),20,30+i*29)} const y=30+(1-h/h0)*290; c4.fillStyle='#00d4ff'; c4.beginPath(); c4.arc(280,y,14,0,7); c4.fill();
+state.anim=requestAnimationFrame(loop);
+})(performance.now())}
+function practicePage(){app.innerHTML=`<section class='page'>${header()}<h2>Практика</h2>${[1,2,3,4].map(i=>`<div class='card'><h3>${i}-Практика</h3><div id='pq${i}'></div><button class='btn' onclick='gradePractice(${i})'>Тексеру</button><p id='ps${i}' class='formula'></p></div>`).join('')}</section>`; [1,2,3,4].forEach(i=>renderQuiz(i))}
+function renderQuiz(i){pq[i].innerHTML=practices[i].map((q,qi)=>`<div class='card'><p>${qi+1}) ${q[0]}</p>${q[1].map((o,oi)=>`<label><input type='radio' name='p${i}q${qi}' value='${oi}'> ${o}</label><br>`).join('')}</div>`).join('')}
+function gradePractice(i){let s=0;practices[i].forEach((q,qi)=>{const v=document.querySelector(`input[name='p${i}q${qi}']:checked`)?.value; if(+v===q[2])s++}); ps[i].textContent=`Нәтиже: ${s}/5`; const p=get('practiceResults',{}); p[i]={score:s,at:new Date().toISOString()}; save('practiceResults',p)}
+function arPage(){app.innerHTML=`<section class='page'>${header()}<h2>AR Режим</h2><div class='row'>${[1,2,3,4].map(i=>`<button class='btn secondary' onclick='state.arTab=${i}'>${i}</button>`).join('')}<button class='btn' onclick='startAR()'>Камераны қосу</button><button class='btn warn' onclick='stopAR()'>Тоқтату</button></div><p class='muted' id='arMsg'>Камера рұқсатын беріңіз. Артқы камера қолданылады.</p><div id='arWrap'><video id='arVideo' autoplay muted playsinline></video><canvas id='arCanvas'></canvas></div></section>`}
+async function startAR(){try{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}); state.media=stream; arVideo.srcObject=stream; arMsg.textContent='AR іске қосылды'; runAR()}catch{arMsg.textContent='Камераға рұқсат жоқ немесе қолдау жоқ.'}}
+function stopAR(){if(state.media)state.media.getTracks().forEach(t=>t.stop());state.media=null;cancelAnimationFrame(state.arAnim)}
+function runAR(){const c=arCanvas,ctx=c.getContext('2d'); const resize=()=>{c.width=arWrap.clientWidth;c.height=arWrap.clientHeight}; resize();
+(function loop(t){ctx.clearRect(0,0,c.width,c.height);ctx.strokeStyle='#00d4ff';ctx.lineWidth=3; const cx=c.width/2,cy=c.height/2;
+if(state.arTab===1){const a=Math.sin(t/700)*0.6;ctx.beginPath();ctx.moveTo(cx,40);ctx.lineTo(cx+Math.sin(a)*140,40+Math.cos(a)*140);ctx.stroke();ctx.fillStyle='#00ff9d';ctx.beginPath();ctx.arc(cx+Math.sin(a)*140,40+Math.cos(a)*140,16,0,7);ctx.fill()}
+if(state.arTab===2){ctx.strokeRect(cx-120,cy-60,240,120);ctx.fillStyle='rgba(0,212,255,.25)';ctx.fillRect(cx-40,cy-20,80,40)}
+if(state.arTab===3){ctx.beginPath();ctx.moveTo(30,cy+100);ctx.lineTo(c.width-30,cy+100);ctx.stroke();ctx.setLineDash([6,6]);ctx.beginPath();ctx.moveTo(cx,40);ctx.lineTo(cx,c.height-20);ctx.stroke();ctx.setLineDash([])}
+if(state.arTab===4){const y=50+((t/20)% (c.height-120));ctx.fillStyle='#00d4ff';ctx.beginPath();ctx.arc(cx,y,14,0,7);ctx.fill()}
+state.arAnim=requestAnimationFrame(loop)})(performance.now())}
+function aiPage(){app.innerHTML=`<section class='page'>${header()}<h2>AI Көмекші</h2><div class='chat' id='chatBox'>${state.chat.map(m=>`<div class='bubble ${m.role==='user'?'u':'a'}'>${m.content}</div>`).join('')}</div><div class='row'><input id='aiInput' placeholder='Физикадан сұрақ қойыңыз...'><button class='btn' onclick='sendAI()'>Жіберу</button></div><p id='aiLoading' class='muted'></p></section>`}
+async function sendAI(){const message=aiInput.value.trim(); if(!message)return; state.chat.push({role:'user',content:message}); aiInput.value=''; aiPage(); aiLoading.textContent='Жауап дайындалуда...';
+const res=await fetch('./api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.token},body:JSON.stringify({message,history:state.chat})}); const j=await res.json(); state.chat.push({role:'assistant',content:j.reply||'Қате.'}); aiPage()}
+function resultsPage(){const l=get('labsResults',{}),p=get('practiceResults',{}); const done=Object.keys(l).length+Object.keys(p).length,total=8,pr=Math.round(done/total*100);
+app.innerHTML=`<section class='page'>${header()}<h2>Нәтижелерім</h2><div class='card'><h3>Жалпы прогресс: ${pr}%</h3><div class='progress'><span style='width:${pr}%'></span></div></div><div class='card'><h3>Зертханалар</h3>${Object.entries(l).map(([k,v])=>`<p>${k}-зертхана: ${v.text}</p>`).join('')||'<p class="muted">Әлі жоқ</p>'}</div><div class='card'><h3>Практика</h3>${Object.entries(p).map(([k,v])=>`<p>${k}-практика: ${v.score}/5</p>`).join('')||'<p class="muted">Әлі жоқ</p>'}</div></section>`}
+window.addEventListener('hashchange',render); window.addEventListener('load',()=>{if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');render()});
+</script>
+</body>
+</html>
